@@ -129,7 +129,7 @@ export default function App() {
             items: [{ description: '', quantity: 1, price: 0.00 }],
             tax: 0.0,
             discount: 0.00,
-            notes: 'Thank you for your business.',
+            notes: "Grateful for your business, Your timely payment means a lot!",
             status: 'unpaid',
             currency: CURRENCIES[0] // Default to USD
         };
