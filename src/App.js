@@ -37,58 +37,6 @@ const Notification = memo(({ message, show, type, onDismiss }) => {
 });
 
 // --- Child Components ---
-const Dashboard = memo(({ invoices }) => {
-    const stats = {
-        total: invoices.length,
-        paid: invoices.filter(inv => inv.status === 'paid').length,
-        unpaid: invoices.filter(inv => inv.status === 'unpaid').length,
-    };
-
-    const totalRevenueByCurrency = invoices
-        .filter(inv => inv.status === 'paid')
-        .reduce((acc, inv) => {
-            const currencyCode = inv.currency?.code || 'USD';
-            const invSubtotal = inv.items.reduce((sum, item) => sum + Number(item.quantity) * Number(item.price), 0);
-            const invTaxAmount = (invSubtotal * Number(inv.tax)) / 100;
-            const invTotal = invSubtotal + invTaxAmount - Number(inv.discount);
-            
-            if (!acc[currencyCode]) {
-                acc[currencyCode] = { total: 0, symbol: inv.currency?.symbol || '$' };
-            }
-            acc[currencyCode].total += invTotal;
-            return acc;
-        }, {});
-
-
-    return (
-        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Dashboard</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                 <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="text-xl sm:text-2xl font-bold text-blue-600">
-                        {Object.keys(totalRevenueByCurrency).length > 0 ? Object.entries(totalRevenueByCurrency).map(([code, data]) => (
-                            <div key={code}>{data.symbol}{data.total.toFixed(2)}</div>
-                        )) : '$0.00'}
-                    </div>
-                    <p className="text-xs sm:text-sm text-gray-500">Total Revenue</p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-xl sm:text-2xl font-bold text-gray-800">{stats.total}</p>
-                    <p className="text-xs sm:text-sm text-gray-500">Total Invoices</p>
-                </div>
-                 <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.paid}</p>
-                    <p className="text-xs sm:text-sm text-gray-500">Paid</p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.unpaid}</p>
-                    <p className="text-xs sm:text-sm text-gray-500">Unpaid</p>
-                </div>
-            </div>
-        </div>
-    );
-});
-
 const InvoiceList = memo(({ invoices, onSelect, onDelete }) => (
     <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Invoices</h2>
@@ -115,36 +63,7 @@ const InvoiceList = memo(({ invoices, onSelect, onDelete }) => (
     </div>
 ));
 
-const ClientModal = memo(({ isOpen, isEditMode, currentClient, onClientChange, onSubmit, onClose }) => {
-    if (!isOpen) return null;
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-8 w-full max-w-md">
-                <h2 className="text-xl font-semibold mb-4">{isEditMode ? 'Edit Client' : 'Add New Client'}</h2>
-                <form onSubmit={onSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Name</label>
-                        <input type="text" name="name" value={currentClient.name} onChange={onClientChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" required />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" name="email" value={currentClient.email} onChange={onClientChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" required />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Address</label>
-                        <textarea name="address" value={currentClient.address} onChange={onClientChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" required />
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">{isEditMode ? 'Update Client' : 'Add Client'}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-});
-
-const ShareModal = memo(({ isOpen, onClose, downloadJPG, downloadPDF }) => {
+const DownloadModal = memo(({ isOpen, onClose, downloadJPG, downloadPDF }) => {
     if (!isOpen) return null;
 
     return (
@@ -208,7 +127,7 @@ export default function App() {
             billFrom: { name: 'Your Company', email: 'your@company.com', address: '123 Main St, City, Country' },
             billTo: { name: '', email: '', address: '' },
             items: [{ description: '', quantity: 1, price: 0.00 }],
-            tax: 8.0,
+            tax: 0.0,
             discount: 0.00,
             notes: 'Thank you for your business.',
             status: 'unpaid',
@@ -218,14 +137,10 @@ export default function App() {
     
     const [isLoading, setIsLoading] = useState(true);
     const [invoices, setInvoices] = useState([]);
-    const [clients, setClients] = useState([]);
     const [currentInvoice, setCurrentInvoice] = useState(getInitialInvoiceState);
-    const [isClientModalOpen, setClientModalOpen] = useState(false);
-    const [isShareModalOpen, setShareModalOpen] = useState(false);
+    const [isDownloadModalOpen, setDownloadModalOpen] = useState(false);
     const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
     const [invoiceToDelete, setInvoiceToDelete] = useState(null);
-    const [isClientEditMode, setClientEditMode] = useState(false);
-    const [currentClient, setCurrentClient] = useState({ name: '', email: '', address: '' });
     const [notification, setNotification] = useState({ message: '', show: false, type: 'success' });
     
     const invoicePreviewRef = useRef(null);
@@ -238,31 +153,21 @@ export default function App() {
             if (savedInvoices) {
                 setInvoices(savedInvoices);
             }
-            const savedClients = JSON.parse(localStorage.getItem('clients'));
-            if (savedClients) {
-                setClients(savedClients);
-            }
         } catch (error) {
-            console.error("Error loading data from localStorage", error);
+            console.error("Error loading invoices from localStorage", error);
         }
         setIsLoading(false);
     }, []);
 
     useEffect(() => {
-        try {
-            localStorage.setItem('invoices', JSON.stringify(invoices));
-        } catch (error) {
-            console.error("Error saving invoices to localStorage", error);
+        if(!isLoading) {
+            try {
+                localStorage.setItem('invoices', JSON.stringify(invoices));
+            } catch (error) {
+                console.error("Error saving invoices to localStorage", error);
+            }
         }
-    }, [invoices]);
-
-    useEffect(() => {
-        try {
-            localStorage.setItem('clients', JSON.stringify(clients));
-        } catch (error) {
-            console.error("Error saving clients to localStorage", error);
-        }
-    }, [clients]);
+    }, [invoices, isLoading]);
 
     // --- Script Loading Effect ---
     useEffect(() => {
@@ -342,39 +247,6 @@ export default function App() {
             return { ...prev, items };
         });
     }, []);
-    
-    const handleClientSelect = useCallback((clientId) => {
-        const selected = clients.find(c => c.id === clientId);
-        if (selected) {
-            setCurrentInvoice(prev => ({ ...prev, billTo: { name: selected.name, email: selected.email, address: selected.address } }));
-        }
-    }, [clients]);
-    
-    // --- Client Modal Logic ---
-    const openNewClientModal = useCallback(() => {
-        setClientEditMode(false);
-        setCurrentClient({ name: '', email: '', address: '' });
-        setClientModalOpen(true);
-    }, []);
-
-    const handleClientChange = useCallback((e) => {
-        const { name, value } = e.target;
-        setCurrentClient(prev => ({...prev, [name]: value}));
-    }, [])
-
-    const handleClientSubmit = useCallback(async (e) => {
-        e.preventDefault();
-        setClients(prevClients => {
-            if(isClientEditMode) {
-                return prevClients.map(client => client.id === currentClient.id ? currentClient : client);
-            } else {
-                return [...prevClients, { ...currentClient, id: crypto.randomUUID() }];
-            }
-        });
-        setNotification({ message: isClientEditMode ? 'Client updated!' : 'Client added!', show: true, type: 'success' });
-        setClientModalOpen(false);
-    }, [isClientEditMode, currentClient]);
-
 
     // --- Invoice Actions ---
     const saveInvoice = useCallback(() => {
@@ -488,8 +360,6 @@ export default function App() {
                     </button>
                 </div>
                 
-                <Dashboard invoices={invoices} />
-                
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Left Column: Form & Lists */}
                     <div>
@@ -536,13 +406,6 @@ export default function App() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-gray-600 mb-2">Bill To</h3>
-                                    <div className="flex gap-2 mb-2">
-                                        <select onChange={(e) => handleClientSelect(e.target.value)} className="w-full p-2 border rounded-md bg-white">
-                                            <option value="">Select a client</option>
-                                            {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                        </select>
-                                        <button onClick={openNewClientModal} className="p-2 bg-gray-100 rounded-md hover:bg-gray-200 shrink-0"><Plus size={20} /></button>
-                                    </div>
                                     <input placeholder="Client Name" name="name" value={currentInvoice.billTo.name} onChange={(e) => handleInputChange(e, 'billTo')} className="w-full mb-2 p-2 border rounded-md" />
                                     <input placeholder="Client Email" name="email" value={currentInvoice.billTo.email} onChange={(e) => handleInputChange(e, 'billTo')} className="w-full mb-2 p-2 border rounded-md" />
                                     <textarea placeholder="Client Address" name="address" value={currentInvoice.billTo.address} onChange={(e) => handleInputChange(e, 'billTo')} className="w-full p-2 border rounded-md" rows="2"></textarea>
@@ -551,14 +414,21 @@ export default function App() {
 
                             <div>
                                 <h3 className="font-semibold text-gray-600 mb-2">Items</h3>
+                                <div className="hidden sm:grid grid-cols-12 gap-2 items-center text-xs font-bold text-gray-500 uppercase mb-1">
+                                    <div className="col-span-5">Description</div>
+                                    <div className="col-span-2">Qty</div>
+                                    <div className="col-span-2">Price</div>
+                                    <div className="col-span-2 text-right">Total</div>
+                                    <div className="col-span-1"></div>
+                                </div>
                                 <div className="space-y-2">
                                 {currentInvoice.items.map((item, index) => (
                                     <div key={index} className="grid grid-cols-12 gap-2 items-center">
                                         <input name="description" placeholder="Item description" value={item.description} onChange={e => handleItemChange(index, e)} className="col-span-12 sm:col-span-5 p-2 border rounded-md" />
-                                        <input name="quantity" type="number" value={item.quantity} onChange={e => handleItemChange(index, e)} className="col-span-4 sm:col-span-2 p-2 border rounded-md" />
-                                        <input name="price" type="number" step="0.01" value={item.price} onChange={e => handleItemChange(index, e)} className="col-span-4 sm:col-span-2 p-2 border rounded-md" />
+                                        <input name="quantity" type="number" placeholder="Qty" value={item.quantity} onChange={e => handleItemChange(index, e)} className="col-span-4 sm:col-span-2 p-2 border rounded-md" />
+                                        <input name="price" type="number" placeholder="Price" step="0.01" value={item.price} onChange={e => handleItemChange(index, e)} className="col-span-4 sm:col-span-2 p-2 border rounded-md" />
                                         <span className="col-span-3 sm:col-span-2 text-right p-2">{currentInvoice.currency.symbol}{(Number(item.quantity) * Number(item.price)).toFixed(2)}</span>
-                                        <button onClick={() => handleRemoveItem(index)} className="col-span-1 text-red-500 hover:text-red-700"><Trash2 size={16} /></button>
+                                        <button onClick={() => handleRemoveItem(index)} className="col-span-1 text-red-500 hover:text-red-700 justify-self-center"><Trash2 size={16} /></button>
                                     </div>
                                 ))}
                                 </div>
@@ -598,7 +468,7 @@ export default function App() {
                     <div className="sticky top-8">
                         <div className="flex flex-col sm:flex-row items-center gap-2 mb-4">
                             <button onClick={saveInvoice} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 transition">Save</button>
-                            <button onClick={() => setShareModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg shadow-sm hover:bg-gray-800 transition"><Share2 size={18} /> Share / Download</button>
+                            <button onClick={() => setDownloadModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg shadow-sm hover:bg-gray-800 transition"><Download size={18} /> Download</button>
                         </div>
                          <div className="flex items-center justify-center gap-4 mb-4">
                             <span className="text-sm font-medium text-gray-600">Status:</span>
@@ -685,17 +555,9 @@ export default function App() {
                     </div>
                 </div>
             </main>
-            {isClientModalOpen && <ClientModal 
-                isOpen={isClientModalOpen} 
-                isEditMode={isClientEditMode}
-                currentClient={currentClient}
-                onClientChange={handleClientChange}
-                onSubmit={handleClientSubmit}
-                onClose={() => setClientModalOpen(false)}
-            />}
-            {isShareModalOpen && <ShareModal
-                isOpen={isShareModalOpen}
-                onClose={() => setShareModalOpen(false)}
+            {isDownloadModalOpen && <DownloadModal
+                isOpen={isDownloadModalOpen}
+                onClose={() => setDownloadModalOpen(false)}
                 downloadJPG={downloadJPG}
                 downloadPDF={downloadPDF}
             />}
