@@ -118,13 +118,16 @@ const ConfirmationModal = memo(({ isOpen, onClose, onConfirm, title, message }) 
 export default function App() {
     
     const getInitialInvoiceState = useCallback(() => {
+        const savedBillFrom = JSON.parse(localStorage.getItem('billFromDetails'));
+        const savedLogo = localStorage.getItem('companyLogo');
+
         return {
             id: null,
-            logo: null,
+            logo: savedLogo || null,
             invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
             issueDate: new Date().toISOString().split('T')[0],
             dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            billFrom: { name: 'Your Company', email: 'your@company.com', address: '123 Main St, City, Country' },
+            billFrom: savedBillFrom || { name: 'Your Company', email: 'your@company.com', address: '123 Main St, City, Country' },
             billTo: { name: '', email: '', address: '' },
             items: [{ description: '', quantity: 1, price: 0.00 }],
             tax: 0.0,
@@ -168,6 +171,21 @@ export default function App() {
             }
         }
     }, [invoices, isLoading]);
+
+    useEffect(() => {
+        if(!isLoading) {
+            try {
+                localStorage.setItem('billFromDetails', JSON.stringify(currentInvoice.billFrom));
+                if (currentInvoice.logo) {
+                    localStorage.setItem('companyLogo', currentInvoice.logo);
+                } else {
+                    localStorage.removeItem('companyLogo');
+                }
+            } catch (error) {
+                console.error("Error saving billFrom/logo to localStorage", error);
+            }
+        }
+    }, [currentInvoice.billFrom, currentInvoice.logo, isLoading]);
 
     // --- Script Loading Effect ---
     useEffect(() => {
