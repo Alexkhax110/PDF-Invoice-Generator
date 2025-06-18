@@ -520,7 +520,18 @@ export default function App() {
 
         setNotification({ message: 'Generating JPG...', show: true, type: 'success' });
 
-        window.html2canvas(input, { scale: 3, useCORS: true }).then(canvas => {
+        // Improved configuration for better quality and handling of content overflow
+        window.html2canvas(input, { 
+            scale: 2, 
+            useCORS: true,
+            allowTaint: true,
+            height: input.scrollHeight,
+            width: input.scrollWidth,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: input.scrollWidth,
+            windowHeight: input.scrollHeight
+        }).then(canvas => {
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             const link = document.createElement('a');
             link.href = imgData;
@@ -548,14 +559,31 @@ export default function App() {
         const html2canvas = window.html2canvas;
         const { jsPDF } = window.jspdf;
 
-        html2canvas(input, { scale: 3, useCORS: true }).then(canvas => {
+        // Improved configuration for better quality and handling of content overflow
+        html2canvas(input, { 
+            scale: 2, 
+            useCORS: true,
+            allowTaint: true,
+            height: input.scrollHeight,
+            width: input.scrollWidth,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: input.scrollWidth,
+            windowHeight: input.scrollHeight
+        }).then(canvas => {
             // Convert canvas to JPEG for better compression
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-            const pdf = new jsPDF('p', 'in', 'letter');
+            // Calculate PDF dimensions based on content
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+            
+            // Use A4 proportions but adjust for content
+            const pdfWidth = 8.5; // inches
+            const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
+            
+            const pdf = new jsPDF('p', 'in', [pdfWidth, pdfHeight]);
             pdf.viewerPreferences({'FitWindow': true}, true);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
             // Add the image as JPEG with FAST compression
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
@@ -923,12 +951,24 @@ export default function App() {
 
                         {/* Invoice Preview */}
                         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
-                            <div ref={invoicePreviewRef} className="bg-white p-8 text-gray-900 min-h-[600px]">
+                            <div ref={invoicePreviewRef} className="bg-white p-8 text-gray-900">
                                 {/* Header */}
                                 <div className="flex justify-between items-start mb-12">
                                     <div>
                                         {currentInvoice.logo && (
-                                            <img src={currentInvoice.logo} alt="Company Logo" className="w-24 h-24 object-contain mb-6" />
+                                            <div className="mb-6 w-32 h-24 flex items-center justify-start">
+                                                <img 
+                                                    src={currentInvoice.logo} 
+                                                    alt="Company Logo" 
+                                                    className="max-w-full max-h-full object-contain"
+                                                    style={{ 
+                                                        width: 'auto', 
+                                                        height: 'auto',
+                                                        maxWidth: '128px',
+                                                        maxHeight: '96px'
+                                                    }}
+                                                />
+                                            </div>
                                         )}
                                         <h1 className="text-2xl font-bold text-gray-900 mb-2">{currentInvoice.billFrom.name || 'Your Company'}</h1>
                                         <div className="text-gray-600 space-y-1">
@@ -1023,7 +1063,7 @@ export default function App() {
 
                                 {/* Notes */}
                                 {currentInvoice.notes && (
-                                    <div>
+                                    <div className="mb-8">
                                         <h4 className="font-bold text-gray-500 uppercase tracking-wider text-sm mb-3">Notes</h4>
                                         <p className="text-gray-600 leading-relaxed">{currentInvoice.notes}</p>
                                     </div>
