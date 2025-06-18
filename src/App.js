@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, memo, useCallback, useLayoutEffect } from 'react';
-import { Plus, Download, FileText, Trash2, Upload, X, Share2, Edit, AlertTriangle, Settings, Sun, Moon, GripVertical, RefreshCcw, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Download, FileText, Trash2, Upload, X, Share2, Edit, AlertTriangle, Settings, Sun, Moon, GripVertical, RefreshCcw, ChevronDown, ArrowUp, ArrowDown, Search } from 'lucide-react';
 
 // --- Constants ---
 const DEFAULT_THEME_COLOR = '#e6e7eb'; // A neutral light gray
@@ -21,6 +21,7 @@ const CURRENCIES = [
     { code: 'PKR', symbol: '₨' },
     { code: 'SAR', symbol: '﷼' },
 ];
+
 
 // --- Reusable Notification Component ---
 const Notification = memo(({ message, show, type, onDismiss }) => {
@@ -47,6 +48,75 @@ const Notification = memo(({ message, show, type, onDismiss }) => {
 });
 
 // --- Child Components ---
+
+const CurrencyDropdown = ({ selectedCurrency, onCurrencyChange }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const dropdownRef = useRef(null);
+
+    const filteredCurrencies = CURRENCIES.filter(currency =>
+        currency.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        currency.symbol.includes(searchTerm)
+    );
+    
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+                setSearchTerm('');
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                type="button"
+                className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-700 text-left flex justify-between items-center"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span>{selectedCurrency.code}</span>
+                <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isOpen && (
+                <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    <div className="p-2 sticky top-0 bg-white dark:bg-gray-700">
+                        <div className="relative">
+                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={16}/>
+                            <input
+                                type="text"
+                                placeholder="Search currency..."
+                                className="w-full pl-8 p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <ul>
+                        {filteredCurrencies.map(currency => (
+                            <li
+                                key={currency.code}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+                                onClick={() => {
+                                    onCurrencyChange(currency);
+                                    setIsOpen(false);
+                                    setSearchTerm('');
+                                }}
+                            >
+                                {currency.code} ({currency.symbol})
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    )
+}
+
 const InvoiceList = memo(({ invoices, onSelect, onDelete }) => (
     <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
         <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Recent Invoices</h2>
@@ -161,6 +231,7 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
 export default function App() {
     
     const getInitialInvoiceState = useCallback(() => {
+        // Attempt to load saved details from localStorage
         const savedBillFrom = JSON.parse(localStorage.getItem('billFromDetails'));
         const savedLogo = localStorage.getItem('companyLogo');
 
@@ -170,7 +241,8 @@ export default function App() {
             invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
             issueDate: new Date().toISOString().split('T')[0],
             dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            billFrom: savedBillFrom || { name: 'Your Company', email: 'your@company.com', address: '123 Main St, City, Country' },
+            // Use saved details, or default to empty strings to show placeholders
+            billFrom: savedBillFrom || { name: '', email: '', address: '' },
             billTo: { name: '', email: '', address: '' },
             items: [{ description: '', quantity: 1, price: 0.00, id: crypto.randomUUID() }],
             tax: 0.0,
@@ -230,6 +302,7 @@ export default function App() {
         }
     }, [invoices, isLoading]);
 
+    // Save company details to localStorage whenever they change
     useEffect(() => {
         if(!isLoading) {
             try {
@@ -330,9 +403,8 @@ export default function App() {
         }));
     }, []);
     
-    const handleCurrencyChange = useCallback((e) => {
-        const selectedCurrency = CURRENCIES.find(c => c.code === e.target.value);
-        setCurrentInvoice(prev => ({...prev, currency: selectedCurrency}));
+    const handleCurrencyChange = useCallback((currency) => {
+        setCurrentInvoice(prev => ({ ...prev, currency }));
     }, []);
 
     const handleRemoveItem = useCallback((index) => {
@@ -559,7 +631,7 @@ export default function App() {
                                         <input placeholder="Your Company" name="name" value={currentInvoice.billFrom.name} onChange={(e) => handleInputChange(e, 'billFrom')} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
                                         <input placeholder="your@email.com" name="email" value={currentInvoice.billFrom.email} onChange={(e) => handleInputChange(e, 'billFrom')} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
                                         <textarea placeholder="Company Address" name="address" value={currentInvoice.billFrom.address} onChange={(e) => handleInputChange(e, 'billFrom')} className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows="2"></textarea>
-                                        <div className="mt-2 grid grid-cols-2 gap-4">
+                                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Logo</label>
                                                 <button type="button" onClick={() => logoInputRef.current.click()} className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-sm rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 mt-1">
@@ -569,9 +641,7 @@ export default function App() {
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Currency</label>
-                                                <select value={currentInvoice.currency.code} onChange={handleCurrencyChange} className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-700">
-                                                    {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
-                                                </select>
+                                                <CurrencyDropdown selectedCurrency={currentInvoice.currency} onCurrencyChange={handleCurrencyChange} />
                                             </div>
                                         </div>
                                      </div>
