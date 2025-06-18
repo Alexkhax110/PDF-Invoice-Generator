@@ -181,6 +181,14 @@ export default function App() {
         };
     }, []);
     
+    // Function to safely get initial dark mode from localStorage
+    const getInitialDarkMode = () => {
+        if (typeof window === 'undefined') {
+            return false; // Default for server-side rendering
+        }
+        return localStorage.getItem('darkMode') === 'true';
+    };
+
     const [isLoading, setIsLoading] = useState(true);
     const [invoices, setInvoices] = useState([]);
     const [currentInvoice, setCurrentInvoice] = useState(getInitialInvoiceState);
@@ -189,7 +197,7 @@ export default function App() {
     const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
     const [invoiceToDelete, setInvoiceToDelete] = useState(null);
     const [notification, setNotification] = useState({ message: '', show: false, type: 'success' });
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(getInitialDarkMode); // Initialize state from function
     const [themeColor, setThemeColor] = useState(DEFAULT_THEME_COLOR);
     const [draggedItem, setDraggedItem] = useState(null);
     const [openSection, setOpenSection] = useState(null);
@@ -205,12 +213,6 @@ export default function App() {
             
             const savedThemeColor = localStorage.getItem('themeColor');
             if(savedThemeColor) setThemeColor(savedThemeColor);
-
-            const savedDarkMode = JSON.parse(localStorage.getItem('darkMode'));
-            if (savedDarkMode) {
-                setDarkMode(true);
-                document.documentElement.classList.add('dark');
-            }
 
         } catch (error) {
             console.error("Error loading data from localStorage", error);
@@ -248,17 +250,18 @@ export default function App() {
             localStorage.setItem('themeColor', themeColor);
         }
     }, [themeColor, isLoading]);
-
+    
+    // Effect to handle dark mode changes
     useEffect(() => {
-        if(!isLoading) {
-            localStorage.setItem('darkMode', JSON.stringify(darkMode));
-            if(darkMode) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
+        if (darkMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('darkMode', 'true');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('darkMode', 'false');
         }
-    }, [darkMode, isLoading]);
+    }, [darkMode]);
+
 
     // --- Script Loading Effect ---
     useEffect(() => {
