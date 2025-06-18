@@ -40,8 +40,8 @@ const Notification = memo(({ message, show, type, onDismiss }) => {
             show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-4 opacity-0 scale-95'
         }`}>
             <div className={`backdrop-blur-xl rounded-2xl px-6 py-4 shadow-2xl border border-white/20 max-w-sm ${
-                type === 'success' 
-                    ? 'bg-green-500/90 text-white' 
+                type === 'success'
+                    ? 'bg-green-500/90 text-white'
                     : 'bg-red-500/90 text-white'
             }`}>
                 <div className="flex items-center space-x-2">
@@ -63,7 +63,7 @@ const CurrencyDropdown = ({ selectedCurrency, onCurrencyChange }) => {
         currency.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
         currency.symbol.includes(searchTerm)
     );
-    
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -141,8 +141,8 @@ const InvoiceList = memo(({ invoices, onSelect, onDelete }) => (
                                     {inv.currency?.symbol || '$'}{(inv.items.reduce((acc, item) => acc + Number(item.quantity) * Number(item.price), 0) * (1 + Number(inv.tax) / 100) - Number(inv.discount)).toFixed(2)}
                                 </p>
                                 <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
-                                    inv.status === 'paid' 
-                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' 
+                                    inv.status === 'paid'
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
                                         : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
                                 }`}>
                                     {inv.status}
@@ -151,14 +151,14 @@ const InvoiceList = memo(({ invoices, onSelect, onDelete }) => (
                         </div>
                     </div>
                     <div className="flex justify-end space-x-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button 
-                            onClick={() => onSelect(inv)} 
+                        <button
+                            onClick={() => onSelect(inv)}
                             className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200"
                         >
                             <Edit size={16}/>
                         </button>
-                        <button 
-                            onClick={() => onDelete(inv.id)} 
+                        <button
+                            onClick={() => onDelete(inv.id)}
                             className="p-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                         >
                             <Trash2 size={16}/>
@@ -177,14 +177,14 @@ const InvoiceList = memo(({ invoices, onSelect, onDelete }) => (
 ));
 
 // --- Download Modal Component ---
-const DownloadModal = memo(({ isOpen, onClose, downloadJPG, downloadPDF }) => {
+const DownloadModal = memo(({ isOpen, onClose, downloadJPG, downloadPDF, setDownloadModalOpen }) => {
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border border-white/20">
-                <button 
-                    onClick={onClose} 
+                <button
+                    onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200"
                 >
                     <X size={18} />
@@ -197,24 +197,24 @@ const DownloadModal = memo(({ isOpen, onClose, downloadJPG, downloadPDF }) => {
                     <p className="text-gray-600 dark:text-gray-400 mt-2">Choose your preferred format</p>
                 </div>
                 <div className="space-y-3">
-                    <button 
+                    <button
                         onClick={() => {
                             downloadPDF();
                             setDownloadModalOpen(false);
-                        }} 
+                        }}
                         className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200 font-medium"
                     >
-                        <Download size={20} /> 
+                        <Download size={20} />
                         <span>Download PDF</span>
                     </button>
-                    <button 
+                    <button
                         onClick={() => {
                             downloadJPG();
                             setDownloadModalOpen(false);
-                        }} 
+                        }}
                         className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200 font-medium"
                     >
-                        <Download size={20} /> 
+                        <Download size={20} />
                         <span>Download JPG</span>
                     </button>
                 </div>
@@ -237,14 +237,14 @@ const ConfirmationModal = memo(({ isOpen, onClose, onConfirm, title, message }) 
                     <p className="text-gray-600 dark:text-gray-400">{message}</p>
                 </div>
                 <div className="flex space-x-3">
-                    <button 
-                        onClick={onClose} 
+                    <button
+                        onClick={onClose}
                         className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
                     >
                         Cancel
                     </button>
-                    <button 
-                        onClick={onConfirm} 
+                    <button
+                        onClick={onConfirm}
                         className="flex-1 px-6 py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 hover:scale-[1.02] transition-all duration-200 shadow-lg"
                     >
                         Confirm
@@ -258,12 +258,12 @@ const ConfirmationModal = memo(({ isOpen, onClose, onConfirm, title, message }) 
 // --- Settings Modal Component ---
 const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearAllData, resetTheme }) => {
     if (!isOpen) return null;
-    
+
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border border-white/20">
-                <button 
-                    onClick={onClose} 
+                <button
+                    onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200"
                 >
                     <X size={18} />
@@ -274,42 +274,42 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Settings</h2>
                 </div>
-                 
+
                 <div className="space-y-6">
                     <div>
                         <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Theme Color</label>
                         <div className="flex items-center space-x-3">
                             <div className="w-12 h-12 rounded-xl border-2 border-gray-200 dark:border-gray-600 overflow-hidden">
-                                <input 
-                                    type="color" 
-                                    value={themeColor} 
-                                    onChange={(e) => setThemeColor(e.target.value)} 
+                                <input
+                                    type="color"
+                                    value={themeColor}
+                                    onChange={(e) => setThemeColor(e.target.value)}
                                     className="w-full h-full border-none cursor-pointer"
                                 />
                             </div>
-                            <input 
-                                type="text" 
-                                value={themeColor} 
-                                onChange={(e) => setThemeColor(e.target.value)} 
+                            <input
+                                type="text"
+                                value={themeColor}
+                                onChange={(e) => setThemeColor(e.target.value)}
                                 className="flex-1 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm font-mono"
                             />
-                            <button 
-                                onClick={resetTheme} 
-                                className="p-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all duration-200" 
+                            <button
+                                onClick={resetTheme}
+                                className="p-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all duration-200"
                                 title="Reset to default"
                             >
                                 <RefreshCcw size={18} />
                             </button>
                         </div>
                     </div>
-                    
+
                     <div className="pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
                         <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Data Management</label>
-                        <button 
-                            onClick={clearAllData} 
+                        <button
+                            onClick={clearAllData}
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 hover:scale-[1.02] transition-all duration-200 shadow-lg"
                         >
-                            <Trash2 size={16} /> 
+                            <Trash2 size={16} />
                             <span>Clear All Data</span>
                         </button>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
@@ -324,7 +324,7 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
 
 // --- Main App Component ---
 export default function App() {
-    
+
     const getInitialInvoiceState = useCallback(() => {
         return {
             id: null,
@@ -342,10 +342,11 @@ export default function App() {
             currency: CURRENCIES[0]
         };
     }, []);
-    
+
     const getInitialDarkMode = () => {
         if (typeof window === 'undefined') return false;
-        return false; // Default to light mode for Apple aesthetic
+        // Respect user's system preference
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     };
 
     const [isLoading, setIsLoading] = useState(true);
@@ -360,9 +361,18 @@ export default function App() {
     const [themeColor, setThemeColor] = useState(DEFAULT_THEME_COLOR);
     const [draggedItem, setDraggedItem] = useState(null);
     const [openSection, setOpenSection] = useState(null);
-    
+
     const invoicePreviewRef = useRef(null);
     const logoInputRef = useRef(null);
+    // Dark Mode Effect
+    useEffect(() => {
+        if (darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [darkMode]);
+
 
     // Initialize data
     useEffect(() => {
@@ -414,7 +424,7 @@ export default function App() {
             return { ...prev, items };
         });
     }, []);
-    
+
     const handleLogoChange = useCallback((e) => {
         const file = e.target.files[0];
         if (file) {
@@ -432,7 +442,7 @@ export default function App() {
             items: [...prev.items, { description: '', quantity: 1, price: 0.00, id: crypto.randomUUID() }]
         }));
     }, []);
-    
+
     const handleCurrencyChange = useCallback((currency) => {
         setCurrentInvoice(prev => ({ ...prev, currency }));
     }, []);
@@ -444,7 +454,7 @@ export default function App() {
             return { ...prev, items };
         });
     }, []);
-    
+
     const handleToggleSection = (section) => {
         setOpenSection(prev => prev === section ? null : section);
     }
@@ -475,7 +485,7 @@ export default function App() {
         });
         setNotification({ message: 'Invoice saved successfully!', show: true, type: 'success' });
     }, [currentInvoice]);
-    
+
     const createNewInvoice = useCallback(() => {
         setCurrentInvoice(getInitialInvoiceState());
     }, [getInitialInvoiceState]);
@@ -526,7 +536,7 @@ export default function App() {
 
     const downloadPDF = useCallback(() => {
         const input = invoicePreviewRef.current;
-        
+
         if (!window.html2canvas || !window.jspdf) {
             console.error("PDF generation libraries not loaded.");
             setNotification({ message: 'PDF generation library not found.', show: true, type: 'error' });
@@ -541,15 +551,15 @@ export default function App() {
         html2canvas(input, { scale: 3, useCORS: true }).then(canvas => {
             // Convert canvas to JPEG for better compression
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            
+
             const pdf = new jsPDF('p', 'in', 'letter');
             pdf.viewerPreferences({'FitWindow': true}, true);
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-            
+
             // Add the image as JPEG with FAST compression
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-            
+
             pdf.save(`invoice-${currentInvoice.invoiceNumber}.pdf`);
             setNotification({ message: 'PDF downloaded successfully!', show: true, type: 'success' });
         }).catch(err => {
@@ -561,16 +571,16 @@ export default function App() {
     const selectInvoiceToEdit = useCallback((invoice) => {
         setCurrentInvoice(invoice);
     }, []);
-    
+
     const clearAllData = () => {
         setConfirmModalOpen(true);
         setInvoiceToDelete('all');
     }
-    
+
     const resetTheme = () => {
         setThemeColor(DEFAULT_THEME_COLOR);
     }
-    
+
     // Calculations
     const subtotal = currentInvoice.items.reduce((acc, item) => acc + Number(item.quantity) * Number(item.price), 0);
     const taxAmount = (subtotal * Number(currentInvoice.tax)) / 100;
@@ -578,24 +588,24 @@ export default function App() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+            <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
                 <div className="text-center">
                     <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl animate-pulse mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">Loading...</p>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">Loading...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-            <Notification 
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
+            <Notification
                 message={notification.message}
                 show={notification.show}
                 type={notification.type}
                 onDismiss={() => setNotification({ ...notification, show: false })}
             />
-            
+
             {/* Header */}
             <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50">
                 <div className="max-w-7xl mx-auto px-6 py-4">
@@ -610,20 +620,20 @@ export default function App() {
                             </div>
                         </div>
                         <div className="flex items-center space-x-3">
-                            <button 
-                                onClick={() => setDarkMode(!darkMode)} 
-                                className="p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
+                            <button
+                                onClick={() => setDarkMode(!darkMode)}
+                                className="p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300"
                             >
                                 {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                             </button>
-                            <button 
-                                onClick={() => setSettingsModalOpen(true)} 
-                                className="p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
+                            <button
+                                onClick={() => setSettingsModalOpen(true)}
+                                className="p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300"
                             >
                                 <Settings size={20} />
                             </button>
-                            <button 
-                                onClick={createNewInvoice} 
+                            <button
+                                onClick={createNewInvoice}
                                 className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
                             >
                                 <Plus size={20} />
@@ -633,81 +643,81 @@ export default function App() {
                     </div>
                 </div>
             </header>
-                
+
             <main className="max-w-7xl mx-auto px-6 py-8">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     {/* Left Column: Form & Lists */}
                     <div className="space-y-8">
                         <InvoiceList invoices={invoices} onSelect={selectInvoiceToEdit} onDelete={confirmDelete} />
-                        
+
                         {/* Invoice Form */}
                         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Invoice Details</h2>
-                             
+
                             {/* Basic Info */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Invoice Number</label>
-                                    <input 
-                                        type="text" 
-                                        value={currentInvoice.invoiceNumber} 
-                                        onChange={(e) => setCurrentInvoice({...currentInvoice, invoiceNumber: e.target.value})} 
+                                    <input
+                                        type="text"
+                                        value={currentInvoice.invoiceNumber}
+                                        onChange={(e) => setCurrentInvoice({...currentInvoice, invoiceNumber: e.target.value})}
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Issue Date</label>
-                                    <input 
-                                        type="date" 
-                                        value={currentInvoice.issueDate} 
-                                        onChange={(e) => setCurrentInvoice({...currentInvoice, issueDate: e.target.value})} 
+                                    <input
+                                        type="date"
+                                        value={currentInvoice.issueDate}
+                                        onChange={(e) => setCurrentInvoice({...currentInvoice, issueDate: e.target.value})}
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Due Date</label>
-                                    <input 
-                                        type="date" 
-                                        value={currentInvoice.dueDate} 
-                                        onChange={(e) => setCurrentInvoice({...currentInvoice, dueDate: e.target.value})} 
+                                    <input
+                                        type="date"
+                                        value={currentInvoice.dueDate}
+                                        onChange={(e) => setCurrentInvoice({...currentInvoice, dueDate: e.target.value})}
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     />
                                 </div>
                             </div>
-                            
+
                             {/* Company & Customer Details */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                                 <div className="space-y-4">
                                     <h3 className="font-semibold text-gray-900 dark:text-white">Company Details</h3>
-                                    <input 
-                                        placeholder="Your Company Name" 
-                                        name="name" 
-                                        value={currentInvoice.billFrom.name} 
-                                        onChange={(e) => handleInputChange(e, 'billFrom')} 
+                                    <input
+                                        placeholder="Your Company Name"
+                                        name="name"
+                                        value={currentInvoice.billFrom.name}
+                                        onChange={(e) => handleInputChange(e, 'billFrom')}
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     />
-                                    <input 
-                                        placeholder="your@email.com" 
-                                        name="email" 
-                                        value={currentInvoice.billFrom.email} 
-                                        onChange={(e) => handleInputChange(e, 'billFrom')} 
+                                    <input
+                                        placeholder="your@email.com"
+                                        name="email"
+                                        value={currentInvoice.billFrom.email}
+                                        onChange={(e) => handleInputChange(e, 'billFrom')}
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     />
-                                    <textarea 
-                                        placeholder="Company Address" 
-                                        name="address" 
-                                        value={currentInvoice.billFrom.address} 
-                                        onChange={(e) => handleInputChange(e, 'billFrom')} 
+                                    <textarea
+                                        placeholder="Company Address"
+                                        name="address"
+                                        value={currentInvoice.billFrom.address}
+                                        onChange={(e) => handleInputChange(e, 'billFrom')}
                                         rows="3"
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none"
                                     />
-                                    
+
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Logo</label>
-                                            <button 
-                                                type="button" 
-                                                onClick={() => logoInputRef.current.click()} 
+                                            <button
+                                                type="button"
+                                                onClick={() => logoInputRef.current.click()}
                                                 className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-sm font-medium transition-all duration-200"
                                             >
                                                 <Upload size={16} />
@@ -721,28 +731,28 @@ export default function App() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="space-y-4">
                                     <h3 className="font-semibold text-gray-900 dark:text-white">Customer Details</h3>
-                                    <input 
-                                        placeholder="Client Name" 
-                                        name="name" 
-                                        value={currentInvoice.billTo.name} 
-                                        onChange={(e) => handleInputChange(e, 'billTo')} 
+                                    <input
+                                        placeholder="Client Name"
+                                        name="name"
+                                        value={currentInvoice.billTo.name}
+                                        onChange={(e) => handleInputChange(e, 'billTo')}
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     />
-                                    <input 
-                                        placeholder="Client Email" 
-                                        name="email" 
-                                        value={currentInvoice.billTo.email} 
-                                        onChange={(e) => handleInputChange(e, 'billTo')} 
+                                    <input
+                                        placeholder="Client Email"
+                                        name="email"
+                                        value={currentInvoice.billTo.email}
+                                        onChange={(e) => handleInputChange(e, 'billTo')}
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     />
-                                    <textarea 
-                                        placeholder="Client Address" 
-                                        name="address" 
-                                        value={currentInvoice.billTo.address} 
-                                        onChange={(e) => handleInputChange(e, 'billTo')} 
+                                    <textarea
+                                        placeholder="Client Address"
+                                        name="address"
+                                        value={currentInvoice.billTo.address}
+                                        onChange={(e) => handleInputChange(e, 'billTo')}
                                         rows="3"
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none"
                                     />
@@ -756,44 +766,44 @@ export default function App() {
                                     {currentInvoice.items.map((item, index) => (
                                         <div key={item.id} className="bg-gray-50/80 dark:bg-gray-700/50 rounded-xl p-4">
                                             <div className="grid grid-cols-12 gap-3 items-center">
-                                                <div className="col-span-1 flex flex-col items-center">
-                                                    <button 
-                                                        onClick={() => handleMoveItem(index, 'up')} 
-                                                        disabled={index === 0} 
+                                                <div className="col-span-1 flex flex-col items-center text-gray-700 dark:text-gray-300">
+                                                    <button
+                                                        onClick={() => handleMoveItem(index, 'up')}
+                                                        disabled={index === 0}
                                                         className="p-1 disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-all"
                                                     >
                                                         <ArrowUp size={14}/>
                                                     </button>
-                                                    <button 
-                                                        onClick={() => handleMoveItem(index, 'down')} 
-                                                        disabled={index === currentInvoice.items.length-1} 
+                                                    <button
+                                                        onClick={() => handleMoveItem(index, 'down')}
+                                                        disabled={index === currentInvoice.items.length-1}
                                                         className="p-1 disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-all"
                                                     >
                                                         <ArrowDown size={14}/>
                                                     </button>
                                                 </div>
-                                                <input 
-                                                    name="description" 
-                                                    placeholder="Item description" 
-                                                    value={item.description} 
-                                                    onChange={e => handleItemChange(index, e)} 
+                                                <input
+                                                    name="description"
+                                                    placeholder="Item description"
+                                                    value={item.description}
+                                                    onChange={e => handleItemChange(index, e)}
                                                     className="col-span-7 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                                 />
-                                                <input 
-                                                    name="quantity" 
-                                                    type="number" 
-                                                    placeholder="Qty" 
-                                                    value={item.quantity} 
-                                                    onChange={e => handleItemChange(index, e)} 
+                                                <input
+                                                    name="quantity"
+                                                    type="number"
+                                                    placeholder="Qty"
+                                                    value={item.quantity}
+                                                    onChange={e => handleItemChange(index, e)}
                                                     className="col-span-2 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                                 />
-                                                <input 
-                                                    name="price" 
-                                                    type="number" 
-                                                    placeholder="Price" 
-                                                    step="0.01" 
-                                                    value={item.price} 
-                                                    onChange={e => handleItemChange(index, e)} 
+                                                <input
+                                                    name="price"
+                                                    type="number"
+                                                    placeholder="Price"
+                                                    step="0.01"
+                                                    value={item.price}
+                                                    onChange={e => handleItemChange(index, e)}
                                                     className="col-span-2 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                                 />
                                             </div>
@@ -801,8 +811,8 @@ export default function App() {
                                                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                                                     Total: {currentInvoice.currency.symbol}{(Number(item.quantity) * Number(item.price)).toFixed(2)}
                                                 </span>
-                                                <button 
-                                                    onClick={() => handleRemoveItem(index)} 
+                                                <button
+                                                    onClick={() => handleRemoveItem(index)}
                                                     className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                                                 >
                                                     <Trash2 size={16} />
@@ -811,22 +821,22 @@ export default function App() {
                                         </div>
                                     ))}
                                 </div>
-                                <button 
-                                    onClick={handleAddItem} 
-                                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-400 hover:border-blue-400 hover:text-blue-600 transition-all duration-200"
+                                <button
+                                    onClick={handleAddItem}
+                                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-400 hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-500 dark:hover:text-blue-400 transition-all duration-200"
                                 >
                                     <Plus size={16} />
                                     <span>Add Item</span>
                                 </button>
                             </div>
-                            
+
                             {/* Totals & Notes */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Notes</label>
-                                    <textarea 
-                                        value={currentInvoice.notes} 
-                                        onChange={(e) => setCurrentInvoice({...currentInvoice, notes: e.target.value})} 
+                                    <textarea
+                                        value={currentInvoice.notes}
+                                        onChange={(e) => setCurrentInvoice({...currentInvoice, notes: e.target.value})}
                                         rows="4"
                                         className="w-full bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none"
                                         placeholder="Additional notes or payment terms..."
@@ -835,23 +845,23 @@ export default function App() {
                                 <div className="bg-gray-50/80 dark:bg-gray-700/50 rounded-xl p-4 space-y-3">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
-                                        <span className="font-medium">{currentInvoice.currency.symbol}{subtotal.toFixed(2)}</span>
+                                        <span className="font-medium text-gray-900 dark:text-gray-100">{currentInvoice.currency.symbol}{subtotal.toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
                                         <span className="text-gray-600 dark:text-gray-400">Tax (%)</span>
-                                        <input 
-                                            type="number" 
-                                            value={currentInvoice.tax} 
-                                            onChange={(e) => setCurrentInvoice({...currentInvoice, tax: e.target.value})} 
+                                        <input
+                                            type="number"
+                                            value={currentInvoice.tax}
+                                            onChange={(e) => setCurrentInvoice({...currentInvoice, tax: e.target.value})}
                                             className="w-20 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 text-right text-sm"
                                         />
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
                                         <span className="text-gray-600 dark:text-gray-400">Discount ({currentInvoice.currency.symbol})</span>
-                                        <input 
-                                            type="number" 
-                                            value={currentInvoice.discount} 
-                                            onChange={(e) => setCurrentInvoice({...currentInvoice, discount: e.target.value})} 
+                                        <input
+                                            type="number"
+                                            value={currentInvoice.discount}
+                                            onChange={(e) => setCurrentInvoice({...currentInvoice, discount: e.target.value})}
                                             className="w-20 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 text-right text-sm"
                                         />
                                     </div>
@@ -865,44 +875,44 @@ export default function App() {
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Right Column: Preview & Actions */}
                     <div className="space-y-6">
                         {/* Action Buttons */}
                         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20">
                             <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                                <button 
-                                    onClick={saveInvoice} 
+                                <button
+                                    onClick={saveInvoice}
                                     className="flex-1 flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
                                 >
                                     <span>Save Invoice</span>
                                 </button>
-                                <button 
-                                    onClick={() => setDownloadModalOpen(true)} 
+                                <button
+                                    onClick={() => setDownloadModalOpen(true)}
                                     className="flex-1 flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl font-medium hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
                                 >
                                     <Download size={18} />
                                     <span>Download</span>
                                 </button>
                             </div>
-                            
+
                             <div className="flex items-center justify-center space-x-4">
                                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Status:</span>
-                                <button 
-                                    onClick={() => setCurrentInvoice({...currentInvoice, status: 'paid'})} 
+                                <button
+                                    onClick={() => setCurrentInvoice({...currentInvoice, status: 'paid'})}
                                     className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                        currentInvoice.status === 'paid' 
-                                            ? 'bg-green-500 text-white shadow-lg' 
+                                        currentInvoice.status === 'paid'
+                                            ? 'bg-green-500 text-white shadow-lg'
                                             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                     }`}
                                 >
                                     Paid
                                 </button>
-                                <button 
-                                    onClick={() => setCurrentInvoice({...currentInvoice, status: 'unpaid'})} 
+                                <button
+                                    onClick={() => setCurrentInvoice({...currentInvoice, status: 'unpaid'})}
                                     className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                        currentInvoice.status === 'unpaid' 
-                                            ? 'bg-yellow-500 text-white shadow-lg' 
+                                        currentInvoice.status === 'unpaid'
+                                            ? 'bg-yellow-500 text-white shadow-lg'
                                             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                     }`}
                                 >
@@ -910,7 +920,7 @@ export default function App() {
                                 </button>
                             </div>
                         </div>
-                        
+
                         {/* Invoice Preview */}
                         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
                             <div ref={invoicePreviewRef} className="bg-white p-8 text-gray-900 min-h-[600px]">
@@ -931,7 +941,7 @@ export default function App() {
                                         <p className="text-gray-600 text-lg">#{currentInvoice.invoiceNumber}</p>
                                     </div>
                                 </div>
-                                
+
                                 {/* Bill To & Dates */}
                                 <div className="grid grid-cols-2 gap-12 mb-12">
                                     <div>
@@ -953,7 +963,7 @@ export default function App() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {/* Items Table */}
                                 <div className="mb-12">
                                     <table className="w-full">
@@ -1010,7 +1020,7 @@ export default function App() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {/* Notes */}
                                 {currentInvoice.notes && (
                                     <div>
@@ -1023,7 +1033,7 @@ export default function App() {
                     </div>
                 </div>
             </main>
-            
+
             {/* Modals */}
             {isDownloadModalOpen && (
                 <DownloadModal
@@ -1031,9 +1041,10 @@ export default function App() {
                     onClose={() => setDownloadModalOpen(false)}
                     downloadJPG={downloadJPG}
                     downloadPDF={downloadPDF}
+                    setDownloadModalOpen={setDownloadModalOpen}
                 />
             )}
-            
+
             {isConfirmModalOpen && (
                 <ConfirmationModal
                     isOpen={isConfirmModalOpen}
@@ -1043,7 +1054,7 @@ export default function App() {
                     message={invoiceToDelete === 'all' ? "Are you sure you want to delete all invoices and settings? This action cannot be undone." : "Are you sure you want to delete this invoice? This action cannot be undone."}
                 />
             )}
-            
+
             <SettingsModal
                 isOpen={isSettingsModalOpen}
                 onClose={() => setSettingsModalOpen(false)}
