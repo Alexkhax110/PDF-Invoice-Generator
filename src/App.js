@@ -656,7 +656,14 @@ export default function App() {
 
         setNotification({ message: 'Generating JPG...', show: true, type: 'success' });
 
-        window.html2canvas(input, { scale: 3, useCORS: true }).then(canvas => {
+        window.html2canvas(input, { 
+            scale: 2, 
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: input.scrollWidth,
+            height: input.scrollHeight
+        }).then(canvas => {
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             const link = document.createElement('a');
             link.href = imgData;
@@ -684,17 +691,46 @@ export default function App() {
         const html2canvas = window.html2canvas;
         const { jsPDF } = window.jspdf;
 
-        html2canvas(input, { scale: 3, useCORS: true }).then(canvas => {
-            // Convert canvas to JPEG for better compression
+        html2canvas(input, { 
+            scale: 2, 
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: input.scrollWidth,
+            height: input.scrollHeight
+        }).then(canvas => {
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-            const pdf = new jsPDF('p', 'in', 'letter');
-            pdf.viewerPreferences({'FitWindow': true}, true);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            // Create PDF in portrait mode with letter size
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            // Get page dimensions in mm
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            
+            // Calculate image dimensions to fit the page
+            const imgWidth = pageWidth - 20; // 10mm margin on each side
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            let heightLeft = imgHeight;
+            let position = 10; // 10mm top margin
 
-            // Add the image as JPEG with FAST compression
-            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            // If image height is less than page height, center it
+            if (imgHeight < pageHeight - 20) {
+                position = (pageHeight - imgHeight) / 2;
+                pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+            } else {
+                // If image is taller than page, add multiple pages
+                pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+                heightLeft -= (pageHeight - 20);
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight + 10;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= (pageHeight - 20);
+                }
+            }
 
             pdf.save(`invoice-${currentInvoice.invoiceNumber}.pdf`);
             setNotification({ message: 'PDF downloaded successfully!', show: true, type: 'success' });
@@ -1071,17 +1107,27 @@ export default function App() {
 
                         {/* Invoice Preview */}
                         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
-                            <div ref={invoicePreviewRef} className="bg-white p-8 text-gray-900 min-h-[600px]">
+                            <div ref={invoicePreviewRef} className="bg-white p-8 text-gray-900 min-h-[600px] print:min-h-0" style={{ width: '210mm', maxWidth: '100%' }}>
                                 {/* Header */}
                                 <div className="flex justify-between items-start mb-12">
                                     <div>
                                         {currentInvoice.logo && (
-                                            <img 
-                                                src={currentInvoice.logo} 
-                                                alt="Company Logo" 
-                                                className="object-contain mb-6" 
+                                            <div 
+                                                className="mb-6 flex items-center justify-start"
                                                 style={{ width: `${logoSize}px`, height: `${logoSize}px` }}
-                                            />
+                                            >
+                                                <img 
+                                                    src={currentInvoice.logo} 
+                                                    alt="Company Logo" 
+                                                    className="max-w-full max-h-full object-contain"
+                                                    style={{ 
+                                                        width: 'auto',
+                                                        height: 'auto',
+                                                        maxWidth: `${logoSize}px`,
+                                                        maxHeight: `${logoSize}px`
+                                                    }}
+                                                />
+                                            </div>
                                         )}
                                         <h1 className="text-2xl font-bold text-gray-900 mb-2">{currentInvoice.billFrom.name || 'Your Company'}</h1>
                                         <div className="text-gray-600 space-y-1">
