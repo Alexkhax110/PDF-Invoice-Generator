@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, memo, useCallback, useLayoutEffect } from 'react';
-import { Plus, Download, FileText, Trash2, Upload, X, Share2, Edit, AlertTriangle, Settings, Sun, Moon, GripVertical, RefreshCcw, ChevronDown, ArrowUp, ArrowDown, Search, Sparkles } from 'lucide-react';
+import { Plus, Download, FileText, Trash2, Upload, X, Share2, Edit, AlertTriangle, Settings, Sun, Moon, GripVertical, RefreshCcw, ChevronDown, ArrowUp, ArrowDown, Search, Sparkles, ChevronUp, Eye, EyeOff } from 'lucide-react';
 
 // --- Constants ---
 const DEFAULT_THEME_COLOR = '#007AFF'; // Apple blue
@@ -124,54 +124,80 @@ const CurrencyDropdown = ({ selectedCurrency, onCurrencyChange }) => {
 }
 
 // --- Invoice List Component ---
-const InvoiceList = memo(({ invoices, onSelect, onDelete }) => (
-    <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20 mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Recent Invoices</h2>
-        <div className="space-y-3 max-h-80 overflow-y-auto">
-            {invoices.length > 0 ? invoices.map(inv => (
-                <div key={inv.id} className="group bg-white/60 dark:bg-gray-700/60 backdrop-blur-xl rounded-xl p-4 border border-gray-200/30 dark:border-gray-600/30 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
-                    <div onClick={() => onSelect(inv)} className="flex-grow cursor-pointer">
-                        <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                                <p className="font-semibold text-gray-900 dark:text-gray-100 text-base">{inv.invoiceNumber}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{inv.billTo.name}</p>
+const InvoiceList = memo(({ invoices, onSelect, onDelete, isExpanded, onToggleExpand }) => (
+    <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 mb-8 overflow-hidden">
+        <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Recent Invoices</h2>
+                <button
+                    onClick={onToggleExpand}
+                    className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all duration-200"
+                >
+                    {isExpanded ? (
+                        <>
+                            <EyeOff size={16} />
+                            <span className="text-sm font-medium">Hide</span>
+                        </>
+                    ) : (
+                        <>
+                            <Eye size={16} />
+                            <span className="text-sm font-medium">Show</span>
+                        </>
+                    )}
+                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+            </div>
+            
+            <div className={`transition-all duration-300 ease-in-out ${
+                isExpanded ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+            }`}>
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {invoices.length > 0 ? invoices.map(inv => (
+                        <div key={inv.id} className="group bg-white/60 dark:bg-gray-700/60 backdrop-blur-xl rounded-xl p-4 border border-gray-200/30 dark:border-gray-600/30 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+                            <div onClick={() => onSelect(inv)} className="flex-grow cursor-pointer">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        <p className="font-semibold text-gray-900 dark:text-gray-100 text-base">{inv.invoiceNumber}</p>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{inv.billTo.name}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-bold text-gray-900 dark:text-white text-lg">
+                                            {inv.currency?.symbol || '$'}{(inv.items.reduce((acc, item) => acc + Number(item.quantity) * Number(item.price), 0) * (1 + Number(inv.tax) / 100) - Number(inv.discount)).toFixed(2)}
+                                        </p>
+                                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
+                                            inv.status === 'paid'
+                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
+                                        }`}>
+                                            {inv.status}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="text-right">
-                                <p className="font-bold text-gray-900 dark:text-white text-lg">
-                                    {inv.currency?.symbol || '$'}{(inv.items.reduce((acc, item) => acc + Number(item.quantity) * Number(item.price), 0) * (1 + Number(inv.tax) / 100) - Number(inv.discount)).toFixed(2)}
-                                </p>
-                                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
-                                    inv.status === 'paid'
-                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
-                                }`}>
-                                    {inv.status}
-                                </span>
+                            <div className="flex justify-end space-x-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <button
+                                    onClick={() => onSelect(inv)}
+                                    className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200"
+                                >
+                                    <Edit size={16}/>
+                                </button>
+                                <button
+                                    onClick={() => onDelete(inv.id)}
+                                    className="p-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+                                >
+                                    <Trash2 size={16}/>
+                                </button>
                             </div>
                         </div>
-                    </div>
-                    <div className="flex justify-end space-x-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button
-                            onClick={() => onSelect(inv)}
-                            className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200"
-                        >
-                            <Edit size={16}/>
-                        </button>
-                        <button
-                            onClick={() => onDelete(inv.id)}
-                            className="p-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
-                        >
-                            <Trash2 size={16}/>
-                        </button>
-                    </div>
+                    )) : (
+                        <div className="text-center py-12">
+                            <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                            <p className="text-gray-500 dark:text-gray-400">No invoices yet</p>
+                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Create your first invoice to get started</p>
+                        </div>
+                    )}
                 </div>
-            )) : (
-                <div className="text-center py-12">
-                    <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">No invoices yet</p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Create your first invoice to get started</p>
-                </div>
-            )}
+            </div>
         </div>
     </div>
 ));
@@ -345,7 +371,14 @@ export default function App() {
 
     const getInitialDarkMode = () => {
         if (typeof window === 'undefined') return false;
-        // Respect user's system preference
+        
+        // Check localStorage first for saved preference
+        const savedMode = localStorage.getItem('invoice-dark-mode');
+        if (savedMode !== null) {
+            return savedMode === 'true';
+        }
+        
+        // If no saved preference, respect user's system preference
         return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     };
 
@@ -361,18 +394,37 @@ export default function App() {
     const [themeColor, setThemeColor] = useState(DEFAULT_THEME_COLOR);
     const [draggedItem, setDraggedItem] = useState(null);
     const [openSection, setOpenSection] = useState(null);
+    const [isInvoiceListExpanded, setIsInvoiceListExpanded] = useState(true);
 
     const invoicePreviewRef = useRef(null);
     const logoInputRef = useRef(null);
-    // Dark Mode Effect
+    
+    // Dark Mode Effect with localStorage persistence
     useEffect(() => {
         if (darkMode) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
+        // Save preference to localStorage
+        localStorage.setItem('invoice-dark-mode', darkMode.toString());
     }, [darkMode]);
 
+    // Listen for system theme changes
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        const handleChange = (e) => {
+            // Only update if user hasn't manually set a preference
+            const savedMode = localStorage.getItem('invoice-dark-mode');
+            if (savedMode === null) {
+                setDarkMode(e.matches);
+            }
+        };
+        
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
 
     // Initialize data
     useEffect(() => {
@@ -609,6 +661,10 @@ export default function App() {
         setThemeColor(DEFAULT_THEME_COLOR);
     }
 
+    const toggleDarkMode = () => {
+        setDarkMode(prev => !prev);
+    };
+
     // Calculations
     const subtotal = currentInvoice.items.reduce((acc, item) => acc + Number(item.quantity) * Number(item.price), 0);
     const taxAmount = (subtotal * Number(currentInvoice.tax)) / 100;
@@ -649,7 +705,7 @@ export default function App() {
                         </div>
                         <div className="flex items-center space-x-3">
                             <button
-                                onClick={() => setDarkMode(!darkMode)}
+                                onClick={toggleDarkMode}
                                 className="p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300"
                             >
                                 {darkMode ? <Sun size={20} /> : <Moon size={20} />}
@@ -676,7 +732,13 @@ export default function App() {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     {/* Left Column: Form & Lists */}
                     <div className="space-y-8">
-                        <InvoiceList invoices={invoices} onSelect={selectInvoiceToEdit} onDelete={confirmDelete} />
+                        <InvoiceList 
+                            invoices={invoices} 
+                            onSelect={selectInvoiceToEdit} 
+                            onDelete={confirmDelete}
+                            isExpanded={isInvoiceListExpanded}
+                            onToggleExpand={() => setIsInvoiceListExpanded(!isInvoiceListExpanded)}
+                        />
 
                         {/* Invoice Form */}
                         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20">
