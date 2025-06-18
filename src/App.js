@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, memo, useCallback, useLayoutEffect } from 'react';
 import { Plus, Download, FileText, Trash2, Upload, X, Share2, Edit, AlertTriangle, Settings, Sun, Moon, GripVertical, RefreshCcw, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 // --- Constants ---
@@ -251,8 +251,9 @@ export default function App() {
         }
     }, [themeColor, isLoading]);
     
-    // Effect to handle dark mode changes
-    useEffect(() => {
+    // Effect to handle dark mode changes.
+    // useLayoutEffect runs synchronously before the browser paints, preventing theme flicker on load.
+    useLayoutEffect(() => {
         if (darkMode) {
             document.documentElement.classList.add('dark');
             localStorage.setItem('darkMode', 'true');
