@@ -407,17 +407,6 @@ export default function App() {
         };
     }, []);
 
-    const getInitialDarkMode = () => {
-        if (typeof window === 'undefined') return false;
-        // Check for saved preference first, then system preference
-        const savedTheme = window.localStorage?.getItem('invoice-generator-dark-mode');
-        if (savedTheme !== null) {
-            return savedTheme === 'true';
-        }
-        // Fallback to system preference
-        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    };
-
     const [isLoading, setIsLoading] = useState(true);
     const [invoices, setInvoices] = useState([]);
     const [currentInvoice, setCurrentInvoice] = useState(getInitialInvoiceState);
@@ -426,7 +415,7 @@ export default function App() {
     const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
     const [invoiceToDelete, setInvoiceToDelete] = useState(null);
     const [notification, setNotification] = useState({ message: '', show: false, type: 'success' });
-    const [darkMode, setDarkMode] = useState(getInitialDarkMode);
+    const [darkMode, setDarkMode] = useState(false); // Start with false, initialize later
     const [themeColor, setThemeColor] = useState(DEFAULT_THEME_COLOR);
     const [draggedItem, setDraggedItem] = useState(null);
     const [openSection, setOpenSection] = useState(null);
@@ -436,44 +425,80 @@ export default function App() {
     const invoicePreviewRef = useRef(null);
     const logoInputRef = useRef(null);
     
-    // Dark Mode Effect with localStorage persistence
+    // Apply dark mode class whenever darkMode state changes
     useEffect(() => {
+        const htmlElement = document.documentElement;
+        
+        console.log('Dark mode changing to:', darkMode);
+        console.log('HTML element classes before:', htmlElement.className);
+        
         if (darkMode) {
-            document.documentElement.classList.add('dark');
+            htmlElement.classList.add('dark');
         } else {
-            document.documentElement.classList.remove('dark');
+            htmlElement.classList.remove('dark');
         }
         
-        // Save preference to localStorage for persistence
+        console.log('HTML element classes after:', htmlElement.className);
+        
+        // Save to localStorage if available
         try {
-            window.localStorage?.setItem('invoice-generator-dark-mode', darkMode.toString());
-        } catch (error) {
-            // Handle localStorage not available (like in some artifact environments)
-            console.log('localStorage not available for dark mode persistence');
+            if (typeof window !== 'undefined' && window.localStorage) {
+                localStorage.setItem('invoice-generator-dark-mode', String(darkMode));
+            }
+        } catch (e) {
+            console.log('Could not save dark mode preference');
         }
     }, [darkMode]);
 
-    // Initialize data and check for system dark mode changes
+    // Initialize dark mode from localStorage or system preference (client-side only)
     useEffect(() => {
-        setIsLoading(false);
-        
-        // Listen for system dark mode changes
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handleSystemThemeChange = (e) => {
-            // Only update if user hasn't manually set a preference
+        const initializeDarkMode = () => {
             try {
-                const savedTheme = window.localStorage?.getItem('invoice-generator-dark-mode');
-                if (savedTheme === null) {
+                // Check localStorage first
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    const saved = localStorage.getItem('invoice-generator-dark-mode');
+                    if (saved !== null) {
+                        setDarkMode(saved === 'true');
+                        setIsLoading(false);
+                        return;
+                    }
+                }
+                
+                // Check system preference
+                if (typeof window !== 'undefined' && window.matchMedia) {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    setDarkMode(prefersDark);
+                }
+            } catch (e) {
+                console.log('Dark mode initialization error:', e);
+            }
+            
+            setIsLoading(false);
+        };
+
+        // Run initialization
+        initializeDarkMode();
+
+        // Listen for system theme changes
+        if (typeof window !== 'undefined' && window.matchMedia) {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const handleChange = (e) => {
+                // Only auto-update if no manual preference is saved
+                try {
+                    const saved = localStorage.getItem('invoice-generator-dark-mode');
+                    if (saved === null) {
+                        setDarkMode(e.matches);
+                    }
+                } catch (err) {
                     setDarkMode(e.matches);
                 }
-            } catch (error) {
-                // Fallback if localStorage not available
-                setDarkMode(e.matches);
+            };
+
+            if (mediaQuery.addEventListener) {
+                mediaQuery.addEventListener('change', handleChange);
+                return () => mediaQuery.removeEventListener('change', handleChange);
             }
-        };
-        
-        mediaQuery.addEventListener('change', handleSystemThemeChange);
-        return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+        }
     }, []);
 
     // Toggle function for invoice list
@@ -483,8 +508,12 @@ export default function App() {
 
     // Dark mode toggle function
     const toggleDarkMode = useCallback(() => {
-        setDarkMode(prev => !prev);
-    }, []);
+        console.log('Toggle dark mode clicked, current state:', darkMode);
+        setDarkMode(current => {
+            console.log('Setting dark mode from', current, 'to', !current);
+            return !current;
+        });
+    }, [darkMode]);
 
     // --- Script Loading Effect ---
     useEffect(() => {
@@ -695,7 +724,7 @@ export default function App() {
 
     if (isLoading) {
         return (
-            <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
                 <div className="text-center">
                     <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl animate-pulse mx-auto mb-4"></div>
                     <p className="text-gray-600 dark:text-gray-300 font-medium">Loading...</p>
@@ -705,7 +734,7 @@ export default function App() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
             <Notification
                 message={notification.message}
                 show={notification.show}
@@ -729,8 +758,13 @@ export default function App() {
                         <div className="flex items-center space-x-3">
                             <button
                                 onClick={toggleDarkMode}
-                                className="p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300"
-                                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                                className="p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300 border-2"
+                                style={{
+                                    borderColor: darkMode ? '#374151' : '#e5e7eb',
+                                    backgroundColor: darkMode ? '#374151' : '#f3f4f6',
+                                    color: darkMode ? '#d1d5db' : '#374151'
+                                }}
+                                title={`Current: ${darkMode ? 'Dark' : 'Light'} Mode - Click to switch`}
                             >
                                 {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                             </button>
