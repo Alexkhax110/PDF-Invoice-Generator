@@ -124,54 +124,69 @@ const CurrencyDropdown = ({ selectedCurrency, onCurrencyChange }) => {
 }
 
 // --- Invoice List Component ---
-const InvoiceList = memo(({ invoices, onSelect, onDelete }) => (
+const InvoiceList = memo(({ invoices, onSelect, onDelete, isCollapsed, onToggleCollapse }) => (
     <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20 mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Recent Invoices</h2>
-        <div className="space-y-3 max-h-80 overflow-y-auto">
-            {invoices.length > 0 ? invoices.map(inv => (
-                <div key={inv.id} className="group bg-white/60 dark:bg-gray-700/60 backdrop-blur-xl rounded-xl p-4 border border-gray-200/30 dark:border-gray-600/30 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
-                    <div onClick={() => onSelect(inv)} className="flex-grow cursor-pointer">
-                        <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                                <p className="font-semibold text-gray-900 dark:text-gray-100 text-base">{inv.invoiceNumber}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{inv.billTo.name}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-bold text-gray-900 dark:text-white text-lg">
-                                    {inv.currency?.symbol || '$'}{(inv.items.reduce((acc, item) => acc + Number(item.quantity) * Number(item.price), 0) * (1 + Number(inv.tax) / 100) - Number(inv.discount)).toFixed(2)}
-                                </p>
-                                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
-                                    inv.status === 'paid'
-                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
-                                }`}>
-                                    {inv.status}
-                                </span>
+        <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Recent Invoices</h2>
+            <button
+                onClick={onToggleCollapse}
+                className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+            >
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {isCollapsed ? 'Show' : 'Hide'}
+                </span>
+                <ChevronDown size={16} className={`transition-transform duration-300 text-gray-500 ${isCollapsed ? 'rotate-180' : ''}`} />
+            </button>
+        </div>
+        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            isCollapsed ? 'max-h-0 opacity-0' : 'max-h-80 opacity-100'
+        }`}>
+            <div className="space-y-3 overflow-y-auto">
+                {invoices.length > 0 ? invoices.map(inv => (
+                    <div key={inv.id} className="group bg-white/60 dark:bg-gray-700/60 backdrop-blur-xl rounded-xl p-4 border border-gray-200/30 dark:border-gray-600/30 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+                        <div onClick={() => onSelect(inv)} className="flex-grow cursor-pointer">
+                            <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-base">{inv.invoiceNumber}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{inv.billTo.name}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold text-gray-900 dark:text-white text-lg">
+                                        {inv.currency?.symbol || '$'}{(inv.items.reduce((acc, item) => acc + Number(item.quantity) * Number(item.price), 0) * (1 + Number(inv.tax) / 100) - Number(inv.discount)).toFixed(2)}
+                                    </p>
+                                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
+                                        inv.status === 'paid'
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
+                                    }`}>
+                                        {inv.status}
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                        <div className="flex justify-end space-x-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <button
+                                onClick={() => onSelect(inv)}
+                                className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200"
+                            >
+                                <Edit size={16}/>
+                            </button>
+                            <button
+                                onClick={() => onDelete(inv.id)}
+                                className="p-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+                            >
+                                <Trash2 size={16}/>
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex justify-end space-x-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button
-                            onClick={() => onSelect(inv)}
-                            className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200"
-                        >
-                            <Edit size={16}/>
-                        </button>
-                        <button
-                            onClick={() => onDelete(inv.id)}
-                            className="p-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
-                        >
-                            <Trash2 size={16}/>
-                        </button>
+                )) : (
+                    <div className="text-center py-12">
+                        <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400">No invoices yet</p>
+                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Create your first invoice to get started</p>
                     </div>
-                </div>
-            )) : (
-                <div className="text-center py-12">
-                    <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">No invoices yet</p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Create your first invoice to get started</p>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     </div>
 ));
@@ -256,12 +271,12 @@ const ConfirmationModal = memo(({ isOpen, onClose, onConfirm, title, message }) 
 });
 
 // --- Settings Modal Component ---
-const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearAllData, resetTheme }) => {
+const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearAllData, resetTheme, logoSize, setLogoSize }) => {
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border border-white/20">
+            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border border-white/20 max-h-[90vh] overflow-y-auto">
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200"
@@ -303,6 +318,34 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
                         </div>
                     </div>
 
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Logo Size</label>
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                                <span className="text-sm text-gray-600 dark:text-gray-400 w-12">Small</span>
+                                <input
+                                    type="range"
+                                    min="50"
+                                    max="200"
+                                    step="10"
+                                    value={logoSize}
+                                    onChange={(e) => setLogoSize(Number(e.target.value))}
+                                    className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                                />
+                                <span className="text-sm text-gray-600 dark:text-gray-400 w-12">Large</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Current size: {logoSize}px</span>
+                                <button
+                                    onClick={() => setLogoSize(96)}
+                                    className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                                >
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
                         <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Data Management</label>
                         <button
@@ -317,6 +360,27 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
                         </p>
                     </div>
                 </div>
+
+                <style jsx>{`
+                    .slider::-webkit-slider-thumb {
+                        appearance: none;
+                        height: 20px;
+                        width: 20px;
+                        border-radius: 50%;
+                        background: ${themeColor};
+                        cursor: pointer;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    }
+                    .slider::-moz-range-thumb {
+                        height: 20px;
+                        width: 20px;
+                        border-radius: 50%;
+                        background: ${themeColor};
+                        cursor: pointer;
+                        border: none;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    }
+                `}</style>
             </div>
         </div>
     )
@@ -345,7 +409,12 @@ export default function App() {
 
     const getInitialDarkMode = () => {
         if (typeof window === 'undefined') return false;
-        // Respect user's system preference
+        // Check for saved preference first, then system preference
+        const savedTheme = window.localStorage?.getItem('invoice-generator-dark-mode');
+        if (savedTheme !== null) {
+            return savedTheme === 'true';
+        }
+        // Fallback to system preference
         return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     };
 
@@ -361,22 +430,60 @@ export default function App() {
     const [themeColor, setThemeColor] = useState(DEFAULT_THEME_COLOR);
     const [draggedItem, setDraggedItem] = useState(null);
     const [openSection, setOpenSection] = useState(null);
+    const [isInvoiceListCollapsed, setIsInvoiceListCollapsed] = useState(true);
+    const [logoSize, setLogoSize] = useState(96);
 
     const invoicePreviewRef = useRef(null);
     const logoInputRef = useRef(null);
-    // Dark Mode Effect
+    
+    // Dark Mode Effect with localStorage persistence
     useEffect(() => {
         if (darkMode) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
+        
+        // Save preference to localStorage for persistence
+        try {
+            window.localStorage?.setItem('invoice-generator-dark-mode', darkMode.toString());
+        } catch (error) {
+            // Handle localStorage not available (like in some artifact environments)
+            console.log('localStorage not available for dark mode persistence');
+        }
     }, [darkMode]);
 
-
-    // Initialize data
+    // Initialize data and check for system dark mode changes
     useEffect(() => {
         setIsLoading(false);
+        
+        // Listen for system dark mode changes
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleSystemThemeChange = (e) => {
+            // Only update if user hasn't manually set a preference
+            try {
+                const savedTheme = window.localStorage?.getItem('invoice-generator-dark-mode');
+                if (savedTheme === null) {
+                    setDarkMode(e.matches);
+                }
+            } catch (error) {
+                // Fallback if localStorage not available
+                setDarkMode(e.matches);
+            }
+        };
+        
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+        return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    }, []);
+
+    // Toggle function for invoice list
+    const toggleInvoiceListCollapse = useCallback(() => {
+        setIsInvoiceListCollapsed(prev => !prev);
+    }, []);
+
+    // Dark mode toggle function
+    const toggleDarkMode = useCallback(() => {
+        setDarkMode(prev => !prev);
     }, []);
 
     // --- Script Loading Effect ---
@@ -621,8 +728,9 @@ export default function App() {
                         </div>
                         <div className="flex items-center space-x-3">
                             <button
-                                onClick={() => setDarkMode(!darkMode)}
+                                onClick={toggleDarkMode}
                                 className="p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300"
+                                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
                             >
                                 {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                             </button>
@@ -648,7 +756,13 @@ export default function App() {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     {/* Left Column: Form & Lists */}
                     <div className="space-y-8">
-                        <InvoiceList invoices={invoices} onSelect={selectInvoiceToEdit} onDelete={confirmDelete} />
+                        <InvoiceList 
+                            invoices={invoices} 
+                            onSelect={selectInvoiceToEdit} 
+                            onDelete={confirmDelete}
+                            isCollapsed={isInvoiceListCollapsed}
+                            onToggleCollapse={toggleInvoiceListCollapse}
+                        />
 
                         {/* Invoice Form */}
                         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20">
@@ -928,7 +1042,12 @@ export default function App() {
                                 <div className="flex justify-between items-start mb-12">
                                     <div>
                                         {currentInvoice.logo && (
-                                            <img src={currentInvoice.logo} alt="Company Logo" className="w-24 h-24 object-contain mb-6" />
+                                            <img 
+                                                src={currentInvoice.logo} 
+                                                alt="Company Logo" 
+                                                className="object-contain mb-6" 
+                                                style={{ width: `${logoSize}px`, height: `${logoSize}px` }}
+                                            />
                                         )}
                                         <h1 className="text-2xl font-bold text-gray-900 mb-2">{currentInvoice.billFrom.name || 'Your Company'}</h1>
                                         <div className="text-gray-600 space-y-1">
@@ -1062,6 +1181,8 @@ export default function App() {
                 setThemeColor={setThemeColor}
                 clearAllData={clearAllData}
                 resetTheme={resetTheme}
+                logoSize={logoSize}
+                setLogoSize={setLogoSize}
             />
         </div>
     );
