@@ -294,6 +294,79 @@ const DraggableItem = memo(({ item, index, onItemChange, onRemoveItem, onDragSta
     );
 });
 
+// --- Collapsible Section Component ---
+const CollapsibleSection = memo(({ title, isOpen, onToggle, children, theme, defaultOpen = false }) => (
+    <div 
+        style={{
+            backgroundColor: theme.cardBg,
+            borderColor: theme.cardBorder
+        }}
+        className="backdrop-blur-xl rounded-2xl shadow-xl border mb-6 overflow-hidden transition-all duration-300"
+    >
+        <button
+            onClick={onToggle}
+            className="w-full p-6 text-left flex justify-between items-center hover:opacity-90 transition-all duration-200"
+            style={{ backgroundColor: isOpen ? theme.itemBg : 'transparent' }}
+        >
+            <h2 className="text-xl font-bold" style={{ color: theme.textPrimary }}>{title}</h2>
+            <ChevronDown 
+                size={20} 
+                className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+                style={{ color: theme.textMuted }} 
+            />
+        </button>
+        <div className={`transition-all duration-300 ease-in-out ${
+            isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+        }`}>
+            <div className="p-6 pt-0">
+                {children}
+            </div>
+        </div>
+    </div>
+));
+
+// --- Mobile View Toggle Component ---
+const MobileViewToggle = memo(({ currentView, onViewChange, theme }) => (
+    <div className="lg:hidden mb-6">
+        <div 
+            style={{
+                backgroundColor: theme.cardBg,
+                borderColor: theme.cardBorder
+            }}
+            className="backdrop-blur-xl rounded-2xl p-2 shadow-xl border flex"
+        >
+            <button
+                onClick={() => onViewChange('edit')}
+                className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                    currentView === 'edit'
+                        ? 'bg-blue-500 text-white shadow-lg'
+                        : 'hover:opacity-70'
+                }`}
+                style={currentView !== 'edit' ? {
+                    color: theme.textPrimary
+                } : {}}
+            >
+                <Edit size={16} className="inline mr-2" />
+                Edit Invoice
+            </button>
+            <button
+                onClick={() => onViewChange('preview')}
+                className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                    currentView === 'preview'
+                        ? 'bg-blue-500 text-white shadow-lg'
+                        : 'hover:opacity-70'
+                }`}
+                style={currentView !== 'preview' ? {
+                    color: theme.textPrimary
+                } : {}}
+            >
+                <Eye size={16} className="inline mr-2" />
+                Preview
+            </button>
+        </div>
+    </div>
+));
+
 // --- Invoice List Component ---
 const InvoiceList = memo(({ invoices, onSelect, onDelete, isExpanded, onToggleExpand, theme }) => (
     <div 
@@ -615,6 +688,15 @@ export default function App() {
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const [openSection, setOpenSection] = useState(null);
     const [isInvoiceListExpanded, setIsInvoiceListExpanded] = useState(false);
+    
+    // Mobile responsive states
+    const [currentView, setCurrentView] = useState('edit'); // 'edit' or 'preview'
+    const [collapsedSections, setCollapsedSections] = useState({
+        invoiceDetails: false, // open by default
+        customerDetails: true, // closed by default
+        items: true, // closed by default
+        totals: true // closed by default
+    });
 
     const invoicePreviewRef = useRef(null);
     const logoInputRef = useRef(null);
@@ -874,6 +956,33 @@ export default function App() {
 
     const toggleDarkMode = () => {
         setDarkMode(prev => !prev);
+    };
+
+    // Mobile responsive functions
+    const toggleSection = (sectionName) => {
+        setCollapsedSections(prev => {
+            const newState = { ...prev };
+            
+            // Special behavior: when opening customer details or items, close the other
+            if (sectionName === 'customerDetails' && !prev.customerDetails) {
+                newState.items = true;
+                newState.totals = true;
+            } else if (sectionName === 'items' && !prev.items) {
+                newState.customerDetails = true;
+                newState.totals = true;
+            } else if (sectionName === 'totals' && !prev.totals) {
+                newState.customerDetails = true;
+                newState.items = true;
+            }
+            
+            // Toggle the clicked section
+            newState[sectionName] = !prev[sectionName];
+            return newState;
+        });
+    };
+
+    const switchView = (view) => {
+        setCurrentView(view);
     };
 
     // Calculations
