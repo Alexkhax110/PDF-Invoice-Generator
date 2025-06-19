@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, memo, useCallback, useLayoutEffect } from 'react';
-import { Plus, Download, FileText, Trash2, Upload, X, Share2, Edit, AlertTriangle, Settings, Sun, Moon, GripVertical, RefreshCcw, ChevronDown, ArrowUp, ArrowDown, Search, Sparkles, ChevronUp, Eye, EyeOff } from 'lucide-react';
+import { Plus, Download, FileText, Trash2, Upload, X, Share2, Edit, AlertTriangle, Settings, Sun, Moon, GripVertical, RefreshCcw, ChevronDown, ArrowUp, ArrowDown, Search, Sparkles, ChevronUp, Eye, EyeOff, QrCode } from 'lucide-react';
 
 // --- Constants ---
 const DEFAULT_THEME_COLOR = '#007AFF'; // Apple blue
@@ -22,47 +22,58 @@ const CURRENCIES = [
     { code: 'SAR', symbol: '﷼' },
 ];
 
-// Dark mode theme object
+// QR Code Generator (Simple Implementation)
+const generateQRCode = (text, size = 200) => {
+    // Using QR Server API for QR code generation
+    const encodedText = encodeURIComponent(text);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedText}&format=png&margin=10`;
+};
+
+// Dark mode theme object with improved contrast
 const getTheme = (isDark) => ({
     // Main backgrounds
     mainBg: isDark ? 'linear-gradient(135deg, #1f2937 0%, #111827 50%, #0f172a 100%)' : 'linear-gradient(135deg, #dbeafe 0%, #ffffff 50%, #f3e8ff 100%)',
     
     // Card backgrounds
-    cardBg: isDark ? 'rgba(31, 41, 55, 0.7)' : 'rgba(255, 255, 255, 0.7)',
-    cardBorder: isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(255, 255, 255, 0.2)',
+    cardBg: isDark ? 'rgba(31, 41, 55, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+    cardBorder: isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(255, 255, 255, 0.3)',
     
-    // Text colors
-    textPrimary: isDark ? '#f9fafb' : '#111827',
-    textSecondary: isDark ? '#d1d5db' : '#6b7280',
-    textMuted: isDark ? '#9ca3af' : '#9ca3af',
+    // Text colors with improved contrast
+    textPrimary: isDark ? '#ffffff' : '#0f172a',
+    textSecondary: isDark ? '#e5e7eb' : '#374151',
+    textMuted: isDark ? '#9ca3af' : '#6b7280',
     
-    // Input backgrounds
-    inputBg: isDark ? 'rgba(55, 65, 81, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-    inputBorder: isDark ? '#4b5563' : '#d1d5db',
-    inputText: isDark ? '#f9fafb' : '#111827',
+    // Input backgrounds with better contrast
+    inputBg: isDark ? 'rgba(55, 65, 81, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+    inputBorder: isDark ? '#6b7280' : '#d1d5db',
+    inputText: isDark ? '#ffffff' : '#111827',
     inputPlaceholder: isDark ? '#9ca3af' : '#6b7280',
     
     // Button backgrounds
-    buttonBg: isDark ? '#374151' : '#f3f4f6',
-    buttonHover: isDark ? '#4b5563' : '#e5e7eb',
-    buttonText: isDark ? '#d1d5db' : '#374151',
+    buttonBg: isDark ? '#4b5563' : '#f3f4f6',
+    buttonHover: isDark ? '#6b7280' : '#e5e7eb',
+    buttonText: isDark ? '#e5e7eb' : '#374151',
     
     // Header
-    headerBg: isDark ? 'rgba(17, 24, 39, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-    headerBorder: isDark ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 0.5)',
+    headerBg: isDark ? 'rgba(17, 24, 39, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+    headerBorder: isDark ? 'rgba(75, 85, 99, 0.6)' : 'rgba(229, 231, 235, 0.6)',
     
     // Modal backgrounds
-    modalBg: isDark ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-    modalBorder: isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(255, 255, 255, 0.2)',
+    modalBg: isDark ? 'rgba(31, 41, 55, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+    modalBorder: isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(255, 255, 255, 0.3)',
     
     // Status colors
-    successBg: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
+    successBg: isDark ? 'rgba(34, 197, 94, 0.25)' : '#dcfce7',
     successText: isDark ? '#4ade80' : '#15803d',
-    warningBg: isDark ? 'rgba(251, 191, 36, 0.2)' : '#fef3c7',
+    warningBg: isDark ? 'rgba(251, 191, 36, 0.25)' : '#fef3c7',
     warningText: isDark ? '#fbbf24' : '#92400e',
     
     // Item backgrounds
-    itemBg: isDark ? 'rgba(55, 65, 81, 0.5)' : 'rgba(249, 250, 251, 0.8)',
+    itemBg: isDark ? 'rgba(55, 65, 81, 0.6)' : 'rgba(249, 250, 251, 0.9)',
+    
+    // Drag and drop
+    dragOver: isDark ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.1)',
+    dragActive: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.2)',
 });
 
 // --- Reusable Notification Component ---
@@ -90,6 +101,70 @@ const Notification = memo(({ message, show, type, onDismiss, theme }) => {
                 <div className="flex items-center space-x-2">
                     <Sparkles size={16} />
                     <span className="font-medium">{message}</span>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+// --- QR Code Modal Component ---
+const QRCodeModal = memo(({ isOpen, onClose, paymentInfo, theme }) => {
+    if (!isOpen) return null;
+
+    const qrCodeData = `Payment Details:
+Company: ${paymentInfo.companyName || 'Company Name'}
+Account: ${paymentInfo.accountNumber || 'Account Number'}
+Bank: ${paymentInfo.bankName || 'Bank Name'}
+IBAN/SWIFT: ${paymentInfo.swiftCode || 'SWIFT/IBAN'}
+Amount: ${paymentInfo.amount || '0.00'}`;
+
+    const qrCodeUrl = generateQRCode(qrCodeData, 300);
+
+    return (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div 
+                style={{
+                    backgroundColor: theme.modalBg,
+                    borderColor: theme.modalBorder
+                }}
+                className="backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border"
+            >
+                <button
+                    onClick={onClose}
+                    style={{ color: theme.textMuted }}
+                    className="absolute top-4 right-4 hover:opacity-70 p-2 rounded-full transition-all duration-200"
+                    onMouseEnter={(e) => e.target.style.backgroundColor = theme.buttonBg}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                >
+                    <X size={18} />
+                </button>
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <QrCode className="text-white" size={24} />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2" style={{ color: theme.textPrimary }}>Payment QR Code</h2>
+                    <p className="mb-6" style={{ color: theme.textSecondary }}>Scan to view payment details</p>
+                    
+                    <div className="bg-white p-4 rounded-2xl mb-6 inline-block">
+                        <img 
+                            src={qrCodeUrl} 
+                            alt="Payment QR Code" 
+                            className="w-64 h-64 mx-auto"
+                            onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'block';
+                            }}
+                        />
+                        <div style={{display: 'none'}} className="w-64 h-64 flex items-center justify-center text-gray-500">
+                            QR Code unavailable
+                        </div>
+                    </div>
+                    
+                    <div className="text-left space-y-2" style={{ backgroundColor: theme.itemBg }} className="p-4 rounded-xl">
+                        <p className="text-sm"><strong>Company:</strong> {paymentInfo.companyName || 'Not set'}</p>
+                        <p className="text-sm"><strong>Amount:</strong> {paymentInfo.amount || '0.00'}</p>
+                        <p className="text-sm"><strong>Account:</strong> {paymentInfo.accountNumber || 'Not set'}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -187,6 +262,104 @@ const CurrencyDropdown = ({ selectedCurrency, onCurrencyChange, theme }) => {
         </div>
     )
 }
+
+// --- Draggable Item Component ---
+const DraggableItem = memo(({ item, index, onItemChange, onRemoveItem, onDragStart, onDragEnd, onDragOver, onDrop, isDragging, isDragOver, theme, currency }) => {
+    const handleDragStart = (e) => {
+        e.dataTransfer.setData('text/plain', index.toString());
+        onDragStart(index);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        onDragOver(index);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+        onDrop(fromIndex, index);
+    };
+
+    const handleDragEnd = () => {
+        onDragEnd();
+    };
+
+    return (
+        <div 
+            draggable
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            style={{ 
+                backgroundColor: isDragOver ? theme.dragOver : theme.itemBg,
+                opacity: isDragging ? 0.5 : 1,
+                transform: isDragging ? 'rotate(2deg)' : 'rotate(0deg)',
+                borderColor: isDragOver ? '#3b82f6' : 'transparent'
+            }} 
+            className={`rounded-xl p-4 transition-all duration-200 cursor-move border-2 ${
+                isDragOver ? 'shadow-lg scale-105' : 'shadow-sm'
+            }`}
+        >
+            <div className="grid grid-cols-12 gap-3 items-center">
+                <div className="col-span-1 flex items-center justify-center" style={{ color: theme.textMuted }}>
+                    <GripVertical size={16} className="cursor-grab active:cursor-grabbing" />
+                </div>
+                <input
+                    name="description"
+                    placeholder="Item description"
+                    value={item.description}
+                    onChange={e => onItemChange(index, e)}
+                    style={{
+                        backgroundColor: theme.inputBg,
+                        borderColor: theme.inputBorder,
+                        color: theme.inputText
+                    }}
+                    className="col-span-6 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                />
+                <input
+                    name="quantity"
+                    type="number"
+                    placeholder="Qty"
+                    value={item.quantity}
+                    onChange={e => onItemChange(index, e)}
+                    style={{
+                        backgroundColor: theme.inputBg,
+                        borderColor: theme.inputBorder,
+                        color: theme.inputText
+                    }}
+                    className="col-span-2 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                />
+                <input
+                    name="price"
+                    type="number"
+                    placeholder="Price"
+                    step="0.01"
+                    value={item.price}
+                    onChange={e => onItemChange(index, e)}
+                    style={{
+                        backgroundColor: theme.inputBg,
+                        borderColor: theme.inputBorder,
+                        color: theme.inputText
+                    }}
+                    className="col-span-2 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                />
+                <button
+                    onClick={() => onRemoveItem(index)}
+                    className="col-span-1 p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 ml-2"
+                >
+                    <Trash2 size={16} />
+                </button>
+            </div>
+            <div className="flex justify-between items-center mt-3">
+                <span className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                    Total: {currency.symbol}{(Number(item.quantity) * Number(item.price)).toFixed(2)}
+                </span>
+            </div>
+        </div>
+    );
+});
 
 // --- Invoice List Component ---
 const InvoiceList = memo(({ invoices, onSelect, onDelete, isExpanded, onToggleExpand, theme }) => (
@@ -385,7 +558,7 @@ const ConfirmationModal = memo(({ isOpen, onClose, onConfirm, title, message, th
 });
 
 // --- Settings Modal Component ---
-const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearAllData, resetTheme, theme }) => {
+const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearAllData, resetTheme, paymentInfo, setPaymentInfo, theme }) => {
     if (!isOpen) return null;
 
     return (
@@ -395,7 +568,7 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
                     backgroundColor: theme.modalBg,
                     borderColor: theme.modalBorder
                 }}
-                className="backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border"
+                className="backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border max-h-[90vh] overflow-y-auto"
             >
                 <button
                     onClick={onClose}
@@ -415,7 +588,7 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
 
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-sm font-semibold mb-3" style={{ color: theme.textPrimary }}>Theme Color</label>
+                        <label className="block text-lg font-semibold mb-3" style={{ color: theme.textPrimary }}>Theme Color</label>
                         <div className="flex items-center space-x-3">
                             <div className="w-12 h-12 rounded-xl border-2 overflow-hidden" style={{ borderColor: theme.inputBorder }}>
                                 <input
@@ -451,7 +624,61 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
                     </div>
 
                     <div className="pt-4" style={{ borderTopColor: theme.cardBorder, borderTopWidth: '1px' }}>
-                        <label className="block text-sm font-semibold mb-3" style={{ color: theme.textPrimary }}>Data Management</label>
+                        <label className="block text-lg font-semibold mb-3" style={{ color: theme.textPrimary }}>Payment Information</label>
+                        <div className="space-y-3">
+                            <input
+                                type="text"
+                                placeholder="Company/Business Name"
+                                value={paymentInfo.companyName}
+                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, companyName: e.target.value }))}
+                                style={{
+                                    backgroundColor: theme.inputBg,
+                                    borderColor: theme.inputBorder,
+                                    color: theme.inputText
+                                }}
+                                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Account Number"
+                                value={paymentInfo.accountNumber}
+                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, accountNumber: e.target.value }))}
+                                style={{
+                                    backgroundColor: theme.inputBg,
+                                    borderColor: theme.inputBorder,
+                                    color: theme.inputText
+                                }}
+                                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Bank Name"
+                                value={paymentInfo.bankName}
+                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, bankName: e.target.value }))}
+                                style={{
+                                    backgroundColor: theme.inputBg,
+                                    borderColor: theme.inputBorder,
+                                    color: theme.inputText
+                                }}
+                                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                            />
+                            <input
+                                type="text"
+                                placeholder="SWIFT/IBAN Code"
+                                value={paymentInfo.swiftCode}
+                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, swiftCode: e.target.value }))}
+                                style={{
+                                    backgroundColor: theme.inputBg,
+                                    borderColor: theme.inputBorder,
+                                    color: theme.inputText
+                                }}
+                                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="pt-4" style={{ borderTopColor: theme.cardBorder, borderTopWidth: '1px' }}>
+                        <label className="block text-lg font-semibold mb-3" style={{ color: theme.textPrimary }}>Data Management</label>
                         <button
                             onClick={clearAllData}
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 hover:scale-[1.02] transition-all duration-200 shadow-lg"
@@ -491,16 +718,8 @@ export default function App() {
     }, []);
 
     const getInitialDarkMode = () => {
-        if (typeof window === 'undefined') return false;
-        
-        // Check localStorage first for saved preference
-        const savedMode = localStorage.getItem('invoice-dark-mode');
-        if (savedMode !== null) {
-            return savedMode === 'true';
-        }
-        
-        // If no saved preference, respect user's system preference
-        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // Default to light mode (user's choice to enable dark mode)
+        return false;
     };
 
     const [isLoading, setIsLoading] = useState(true);
@@ -509,13 +728,22 @@ export default function App() {
     const [isDownloadModalOpen, setDownloadModalOpen] = useState(false);
     const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
     const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
+    const [isQRModalOpen, setQRModalOpen] = useState(false);
     const [invoiceToDelete, setInvoiceToDelete] = useState(null);
     const [notification, setNotification] = useState({ message: '', show: false, type: 'success' });
     const [darkMode, setDarkMode] = useState(getInitialDarkMode);
     const [themeColor, setThemeColor] = useState(DEFAULT_THEME_COLOR);
     const [draggedItem, setDraggedItem] = useState(null);
+    const [dragOverIndex, setDragOverIndex] = useState(null);
     const [openSection, setOpenSection] = useState(null);
     const [isInvoiceListExpanded, setIsInvoiceListExpanded] = useState(false);
+    const [paymentInfo, setPaymentInfo] = useState({
+        companyName: '',
+        accountNumber: '',
+        bankName: '',
+        swiftCode: '',
+        amount: ''
+    });
 
     const invoicePreviewRef = useRef(null);
     const logoInputRef = useRef(null);
@@ -525,25 +753,17 @@ export default function App() {
 
     // Dark Mode Effect with localStorage persistence
     useEffect(() => {
+        // Load saved dark mode preference
+        const savedMode = localStorage.getItem('invoice-dark-mode');
+        if (savedMode !== null) {
+            setDarkMode(savedMode === 'true');
+        }
+    }, []);
+
+    useEffect(() => {
         // Save preference to localStorage
         localStorage.setItem('invoice-dark-mode', darkMode.toString());
     }, [darkMode]);
-
-    // Listen for system theme changes
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        
-        const handleChange = (e) => {
-            // Only update if user hasn't manually set a preference
-            const savedMode = localStorage.getItem('invoice-dark-mode');
-            if (savedMode === null) {
-                setDarkMode(e.matches);
-            }
-        };
-        
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
-    }, []);
 
     // Initialize data
     useEffect(() => {
@@ -626,23 +846,34 @@ export default function App() {
         });
     }, []);
 
-    const handleToggleSection = (section) => {
-        setOpenSection(prev => prev === section ? null : section);
-    }
+    // Drag and Drop handlers
+    const handleDragStart = useCallback((index) => {
+        setDraggedItem(index);
+    }, []);
 
-    const handleMoveItem = useCallback((index, direction) => {
+    const handleDragEnd = useCallback(() => {
+        setDraggedItem(null);
+        setDragOverIndex(null);
+    }, []);
+
+    const handleDragOver = useCallback((index) => {
+        setDragOverIndex(index);
+    }, []);
+
+    const handleDrop = useCallback((fromIndex, toIndex) => {
+        if (fromIndex === toIndex) return;
+        
         setCurrentInvoice(prev => {
             const newItems = [...prev.items];
-            const item = newItems[index];
-            const newIndex = direction === 'up' ? index - 1 : index + 1;
-            if (newIndex < 0 || newIndex >= newItems.length) {
-                return prev;
-            }
-            newItems.splice(index, 1);
-            newItems.splice(newIndex, 0, item);
+            const draggedItem = newItems[fromIndex];
+            newItems.splice(fromIndex, 1);
+            newItems.splice(toIndex, 0, draggedItem);
             return { ...prev, items: newItems };
-        })
-    }, [])
+        });
+        
+        setDraggedItem(null);
+        setDragOverIndex(null);
+    }, []);
 
     const saveInvoice = useCallback(() => {
         setInvoices(prevInvoices => {
@@ -691,7 +922,6 @@ export default function App() {
 
         setNotification({ message: 'Generating JPG...', show: true, type: 'success' });
 
-        // Improved configuration for better quality and handling of content overflow
         window.html2canvas(input, { 
             scale: 2, 
             useCORS: true,
@@ -730,7 +960,6 @@ export default function App() {
         const html2canvas = window.html2canvas;
         const { jsPDF } = window.jspdf;
 
-        // Improved configuration for better quality and handling of content overflow
         html2canvas(input, { 
             scale: 2, 
             useCORS: true,
@@ -742,23 +971,15 @@ export default function App() {
             windowWidth: input.scrollWidth,
             windowHeight: input.scrollHeight
         }).then(canvas => {
-            // Convert canvas to JPEG for better compression
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-            // Calculate PDF dimensions based on content
             const imgWidth = canvas.width;
             const imgHeight = canvas.height;
-            
-            // Use A4 proportions but adjust for content
-            const pdfWidth = 8.5; // inches
+            const pdfWidth = 8.5;
             const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
             
             const pdf = new jsPDF('p', 'in', [pdfWidth, pdfHeight]);
             pdf.viewerPreferences({'FitWindow': true}, true);
-
-            // Add the image as JPEG with FAST compression
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-
             pdf.save(`invoice-${currentInvoice.invoiceNumber}.pdf`);
             setNotification({ message: 'PDF downloaded successfully!', show: true, type: 'success' });
         }).catch(err => {
@@ -782,6 +1003,16 @@ export default function App() {
 
     const toggleDarkMode = () => {
         setDarkMode(prev => !prev);
+    };
+
+    const showQRCode = () => {
+        // Update payment info with current total
+        const total = subtotal + taxAmount - Number(currentInvoice.discount);
+        setPaymentInfo(prev => ({ 
+            ...prev, 
+            amount: `${currentInvoice.currency.symbol}${total.toFixed(2)}` 
+        }));
+        setQRModalOpen(true);
     };
 
     // Calculations
@@ -843,6 +1074,17 @@ export default function App() {
                         </div>
                         <div className="flex items-center space-x-3">
                             <button
+                                onClick={showQRCode}
+                                style={{
+                                    backgroundColor: theme.buttonBg,
+                                    color: theme.buttonText
+                                }}
+                                className="p-3 hover:opacity-90 rounded-xl transition-all duration-200"
+                                title="Show QR Code"
+                            >
+                                <QrCode size={20} />
+                            </button>
+                            <button
                                 onClick={toggleDarkMode}
                                 style={{
                                     backgroundColor: theme.buttonBg,
@@ -900,7 +1142,7 @@ export default function App() {
                             {/* Basic Info */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                                 <div>
-                                    <label className="block text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Invoice Number</label>
+                                    <label className="block text-lg font-semibold mb-2" style={{ color: theme.textSecondary }}>Invoice Number</label>
                                     <input
                                         type="text"
                                         value={currentInvoice.invoiceNumber}
@@ -914,7 +1156,7 @@ export default function App() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Issue Date</label>
+                                    <label className="block text-lg font-semibold mb-2" style={{ color: theme.textSecondary }}>Issue Date</label>
                                     <input
                                         type="date"
                                         value={currentInvoice.issueDate}
@@ -928,7 +1170,7 @@ export default function App() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Due Date</label>
+                                    <label className="block text-lg font-semibold mb-2" style={{ color: theme.textSecondary }}>Due Date</label>
                                     <input
                                         type="date"
                                         value={currentInvoice.dueDate}
@@ -946,7 +1188,7 @@ export default function App() {
                             {/* Company & Customer Details */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                                 <div className="space-y-4">
-                                    <h3 className="font-semibold" style={{ color: theme.textPrimary }}>Company Details</h3>
+                                    <h3 className="font-semibold text-lg" style={{ color: theme.textPrimary }}>Company Details</h3>
                                     <input
                                         placeholder="Your Company Name"
                                         name="name"
@@ -987,7 +1229,7 @@ export default function App() {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Logo</label>
+                                            <label className="block text-lg font-medium mb-2" style={{ color: theme.textSecondary }}>Logo</label>
                                             <button
                                                 type="button"
                                                 onClick={() => logoInputRef.current.click()}
@@ -1003,14 +1245,14 @@ export default function App() {
                                             <input type="file" ref={logoInputRef} onChange={handleLogoChange} accept="image/*" className="hidden" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Currency</label>
+                                            <label className="block text-lg font-medium mb-2" style={{ color: theme.textSecondary }}>Currency</label>
                                             <CurrencyDropdown selectedCurrency={currentInvoice.currency} onCurrencyChange={handleCurrencyChange} theme={theme} />
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h3 className="font-semibold" style={{ color: theme.textPrimary }}>Customer Details</h3>
+                                    <h3 className="font-semibold text-lg" style={{ color: theme.textPrimary }}>Customer Details</h3>
                                     <input
                                         placeholder="Client Name"
                                         name="name"
@@ -1051,91 +1293,26 @@ export default function App() {
                                 </div>
                             </div>
 
-                            {/* Items */}
+                            {/* Items with Drag and Drop */}
                             <div className="space-y-4 mb-8">
-                                <h3 className="font-semibold" style={{ color: theme.textPrimary }}>Items</h3>
+                                <h3 className="font-semibold text-lg" style={{ color: theme.textPrimary }}>Items</h3>
                                 <div className="space-y-3">
                                     {currentInvoice.items.map((item, index) => (
-                                        <div key={item.id} style={{ backgroundColor: theme.itemBg }} className="rounded-xl p-4">
-                                            <div className="grid grid-cols-12 gap-3 items-center">
-                                                <div className="col-span-1 flex flex-col items-center" style={{ color: theme.textSecondary }}>
-                                                    <button
-                                                        onClick={() => handleMoveItem(index, 'up')}
-                                                        disabled={index === 0}
-                                                        style={{
-                                                            color: index === 0 ? theme.textMuted : theme.textSecondary
-                                                        }}
-                                                        className="p-1 disabled:opacity-30 hover:opacity-70 rounded transition-all"
-                                                        onMouseEnter={(e) => !e.target.disabled && (e.target.style.backgroundColor = theme.buttonBg)}
-                                                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                                                    >
-                                                        <ArrowUp size={14}/>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleMoveItem(index, 'down')}
-                                                        disabled={index === currentInvoice.items.length-1}
-                                                        style={{
-                                                            color: index === currentInvoice.items.length-1 ? theme.textMuted : theme.textSecondary
-                                                        }}
-                                                        className="p-1 disabled:opacity-30 hover:opacity-70 rounded transition-all"
-                                                        onMouseEnter={(e) => !e.target.disabled && (e.target.style.backgroundColor = theme.buttonBg)}
-                                                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                                                    >
-                                                        <ArrowDown size={14}/>
-                                                    </button>
-                                                </div>
-                                                <input
-                                                    name="description"
-                                                    placeholder="Item description"
-                                                    value={item.description}
-                                                    onChange={e => handleItemChange(index, e)}
-                                                    style={{
-                                                        backgroundColor: theme.inputBg,
-                                                        borderColor: theme.inputBorder,
-                                                        color: theme.inputText
-                                                    }}
-                                                    className="col-span-7 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
-                                                />
-                                                <input
-                                                    name="quantity"
-                                                    type="number"
-                                                    placeholder="Qty"
-                                                    value={item.quantity}
-                                                    onChange={e => handleItemChange(index, e)}
-                                                    style={{
-                                                        backgroundColor: theme.inputBg,
-                                                        borderColor: theme.inputBorder,
-                                                        color: theme.inputText
-                                                    }}
-                                                    className="col-span-2 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
-                                                />
-                                                <input
-                                                    name="price"
-                                                    type="number"
-                                                    placeholder="Price"
-                                                    step="0.01"
-                                                    value={item.price}
-                                                    onChange={e => handleItemChange(index, e)}
-                                                    style={{
-                                                        backgroundColor: theme.inputBg,
-                                                        borderColor: theme.inputBorder,
-                                                        color: theme.inputText
-                                                    }}
-                                                    className="col-span-2 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
-                                                />
-                                            </div>
-                                            <div className="flex justify-between items-center mt-3">
-                                                <span className="text-sm font-medium" style={{ color: theme.textSecondary }}>
-                                                    Total: {currentInvoice.currency.symbol}{(Number(item.quantity) * Number(item.price)).toFixed(2)}
-                                                </span>
-                                                <button
-                                                    onClick={() => handleRemoveItem(index)}
-                                                    className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <DraggableItem
+                                            key={item.id}
+                                            item={item}
+                                            index={index}
+                                            onItemChange={handleItemChange}
+                                            onRemoveItem={handleRemoveItem}
+                                            onDragStart={handleDragStart}
+                                            onDragEnd={handleDragEnd}
+                                            onDragOver={handleDragOver}
+                                            onDrop={handleDrop}
+                                            isDragging={draggedItem === index}
+                                            isDragOver={dragOverIndex === index && draggedItem !== index}
+                                            theme={theme}
+                                            currency={currentInvoice.currency}
+                                        />
                                     ))}
                                 </div>
                                 <button
@@ -1154,7 +1331,7 @@ export default function App() {
                             {/* Totals & Notes */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Notes</label>
+                                    <label className="block text-lg font-semibold mb-2" style={{ color: theme.textSecondary }}>Notes</label>
                                     <textarea
                                         value={currentInvoice.notes}
                                         onChange={(e) => setCurrentInvoice({...currentInvoice, notes: e.target.value})}
@@ -1239,7 +1416,7 @@ export default function App() {
                             </div>
 
                             <div className="flex items-center justify-center space-x-4">
-                                <span className="text-sm font-medium" style={{ color: theme.textSecondary }}>Status:</span>
+                                <span className="text-lg font-medium" style={{ color: theme.textSecondary }}>Status:</span>
                                 <button
                                     onClick={() => setCurrentInvoice({...currentInvoice, status: 'paid'})}
                                     className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
@@ -1411,6 +1588,19 @@ export default function App() {
                 />
             )}
 
+            {isQRModalOpen && (
+                <QRCodeModal
+                    isOpen={isQRModalOpen}
+                    onClose={() => setQRModalOpen(false)}
+                    paymentInfo={{
+                        ...paymentInfo,
+                        companyName: currentInvoice.billFrom.name || paymentInfo.companyName,
+                        amount: `${currentInvoice.currency.symbol}${total.toFixed(2)}`
+                    }}
+                    theme={theme}
+                />
+            )}
+
             {isConfirmModalOpen && (
                 <ConfirmationModal
                     isOpen={isConfirmModalOpen}
@@ -1429,6 +1619,8 @@ export default function App() {
                 setThemeColor={setThemeColor}
                 clearAllData={clearAllData}
                 resetTheme={resetTheme}
+                paymentInfo={paymentInfo}
+                setPaymentInfo={setPaymentInfo}
                 theme={theme}
             />
         </div>
