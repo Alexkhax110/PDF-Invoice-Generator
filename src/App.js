@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, memo, useCallback, useLayoutEffect } from 'react';
-import { Plus, Download, FileText, Trash2, Upload, X, Share2, Edit, AlertTriangle, Settings, Sun, Moon, GripVertical, RefreshCcw, ChevronDown, ArrowUp, ArrowDown, Search, Sparkles, ChevronUp, Eye, EyeOff, QrCode } from 'lucide-react';
+import { Plus, Download, FileText, Trash2, Upload, X, Share2, Edit, AlertTriangle, Settings, Sun, Moon, GripVertical, RefreshCcw, ChevronDown, ArrowUp, ArrowDown, Search, Sparkles, ChevronUp, Eye, EyeOff } from 'lucide-react';
 
 // --- Constants ---
 const DEFAULT_THEME_COLOR = '#007AFF'; // Apple blue
@@ -22,12 +22,7 @@ const CURRENCIES = [
     { code: 'SAR', symbol: '﷼' },
 ];
 
-// QR Code Generator (Simple Implementation)
-const generateQRCode = (text, size = 200) => {
-    // Using QR Server API for QR code generation
-    const encodedText = encodeURIComponent(text);
-    return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedText}&format=png&margin=10`;
-};
+
 
 // Dark mode theme object with improved contrast
 const getTheme = (isDark) => ({
@@ -107,69 +102,7 @@ const Notification = memo(({ message, show, type, onDismiss, theme }) => {
     );
 });
 
-// --- QR Code Modal Component ---
-const QRCodeModal = memo(({ isOpen, onClose, paymentInfo, theme }) => {
-    if (!isOpen) return null;
 
-    const qrCodeData = `Payment Details:
-Company: ${paymentInfo.companyName || 'Company Name'}
-Account: ${paymentInfo.accountNumber || 'Account Number'}
-Bank: ${paymentInfo.bankName || 'Bank Name'}
-IBAN/SWIFT: ${paymentInfo.swiftCode || 'SWIFT/IBAN'}
-Amount: ${paymentInfo.amount || '0.00'}`;
-
-    const qrCodeUrl = generateQRCode(qrCodeData, 300);
-
-    return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div 
-                style={{
-                    backgroundColor: theme.modalBg,
-                    borderColor: theme.modalBorder
-                }}
-                className="backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border"
-            >
-                <button
-                    onClick={onClose}
-                    style={{ color: theme.textMuted }}
-                    className="absolute top-4 right-4 hover:opacity-70 p-2 rounded-full transition-all duration-200"
-                    onMouseEnter={(e) => e.target.style.backgroundColor = theme.buttonBg}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                >
-                    <X size={18} />
-                </button>
-                <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <QrCode className="text-white" size={24} />
-                    </div>
-                    <h2 className="text-2xl font-bold mb-2" style={{ color: theme.textPrimary }}>Payment QR Code</h2>
-                    <p className="mb-6" style={{ color: theme.textSecondary }}>Scan to view payment details</p>
-                    
-                    <div className="bg-white p-4 rounded-2xl mb-6 inline-block">
-                        <img 
-                            src={qrCodeUrl} 
-                            alt="Payment QR Code" 
-                            className="w-64 h-64 mx-auto"
-                            onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'block';
-                            }}
-                        />
-                        <div style={{display: 'none'}} className="w-64 h-64 flex items-center justify-center text-gray-500">
-                            QR Code unavailable
-                        </div>
-                    </div>
-                    
-                    <div className="text-left space-y-2" style={{ backgroundColor: theme.itemBg }} className="p-4 rounded-xl">
-                        <p className="text-sm"><strong>Company:</strong> {paymentInfo.companyName || 'Not set'}</p>
-                        <p className="text-sm"><strong>Amount:</strong> {paymentInfo.amount || '0.00'}</p>
-                        <p className="text-sm"><strong>Account:</strong> {paymentInfo.accountNumber || 'Not set'}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-});
 
 // --- Currency Dropdown Component ---
 const CurrencyDropdown = ({ selectedCurrency, onCurrencyChange, theme }) => {
@@ -229,7 +162,7 @@ const CurrencyDropdown = ({ selectedCurrency, onCurrencyChange, theme }) => {
                                     borderColor: theme.inputBorder,
                                     color: theme.inputText
                                 }}
-                                className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -316,7 +249,7 @@ const DraggableItem = memo(({ item, index, onItemChange, onRemoveItem, onDragSta
                         borderColor: theme.inputBorder,
                         color: theme.inputText
                     }}
-                    className="col-span-6 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                    className="col-span-6 border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
                 />
                 <input
                     name="quantity"
@@ -329,7 +262,7 @@ const DraggableItem = memo(({ item, index, onItemChange, onRemoveItem, onDragSta
                         borderColor: theme.inputBorder,
                         color: theme.inputText
                     }}
-                    className="col-span-2 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                    className="col-span-2 border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
                 />
                 <input
                     name="price"
@@ -343,7 +276,7 @@ const DraggableItem = memo(({ item, index, onItemChange, onRemoveItem, onDragSta
                         borderColor: theme.inputBorder,
                         color: theme.inputText
                     }}
-                    className="col-span-2 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                    className="col-span-2 border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
                 />
                 <button
                     onClick={() => onRemoveItem(index)}
@@ -558,7 +491,7 @@ const ConfirmationModal = memo(({ isOpen, onClose, onConfirm, title, message, th
 });
 
 // --- Settings Modal Component ---
-const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearAllData, resetTheme, paymentInfo, setPaymentInfo, theme }) => {
+const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearAllData, resetTheme, theme }) => {
     if (!isOpen) return null;
 
     return (
@@ -568,7 +501,7 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
                     backgroundColor: theme.modalBg,
                     borderColor: theme.modalBorder
                 }}
-                className="backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border max-h-[90vh] overflow-y-auto"
+                className="backdrop-blur-xl rounded-3xl p-8 w-full max-w-md relative shadow-2xl border"
             >
                 <button
                     onClick={onClose}
@@ -607,7 +540,7 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
                                     borderColor: theme.inputBorder,
                                     color: theme.inputText
                                 }}
-                                className="flex-1 border rounded-xl px-4 py-3 text-sm font-mono"
+                                className="flex-1 border rounded-xl px-4 py-3 text-base font-mono"
                             />
                             <button
                                 onClick={resetTheme}
@@ -620,60 +553,6 @@ const SettingsModal = memo(({ isOpen, onClose, themeColor, setThemeColor, clearA
                             >
                                 <RefreshCcw size={18} />
                             </button>
-                        </div>
-                    </div>
-
-                    <div className="pt-4" style={{ borderTopColor: theme.cardBorder, borderTopWidth: '1px' }}>
-                        <label className="block text-lg font-semibold mb-3" style={{ color: theme.textPrimary }}>Payment Information</label>
-                        <div className="space-y-3">
-                            <input
-                                type="text"
-                                placeholder="Company/Business Name"
-                                value={paymentInfo.companyName}
-                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, companyName: e.target.value }))}
-                                style={{
-                                    backgroundColor: theme.inputBg,
-                                    borderColor: theme.inputBorder,
-                                    color: theme.inputText
-                                }}
-                                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Account Number"
-                                value={paymentInfo.accountNumber}
-                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, accountNumber: e.target.value }))}
-                                style={{
-                                    backgroundColor: theme.inputBg,
-                                    borderColor: theme.inputBorder,
-                                    color: theme.inputText
-                                }}
-                                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Bank Name"
-                                value={paymentInfo.bankName}
-                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, bankName: e.target.value }))}
-                                style={{
-                                    backgroundColor: theme.inputBg,
-                                    borderColor: theme.inputBorder,
-                                    color: theme.inputText
-                                }}
-                                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                            />
-                            <input
-                                type="text"
-                                placeholder="SWIFT/IBAN Code"
-                                value={paymentInfo.swiftCode}
-                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, swiftCode: e.target.value }))}
-                                style={{
-                                    backgroundColor: theme.inputBg,
-                                    borderColor: theme.inputBorder,
-                                    color: theme.inputText
-                                }}
-                                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                            />
                         </div>
                     </div>
 
@@ -728,7 +607,6 @@ export default function App() {
     const [isDownloadModalOpen, setDownloadModalOpen] = useState(false);
     const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
     const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
-    const [isQRModalOpen, setQRModalOpen] = useState(false);
     const [invoiceToDelete, setInvoiceToDelete] = useState(null);
     const [notification, setNotification] = useState({ message: '', show: false, type: 'success' });
     const [darkMode, setDarkMode] = useState(getInitialDarkMode);
@@ -737,13 +615,6 @@ export default function App() {
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const [openSection, setOpenSection] = useState(null);
     const [isInvoiceListExpanded, setIsInvoiceListExpanded] = useState(false);
-    const [paymentInfo, setPaymentInfo] = useState({
-        companyName: '',
-        accountNumber: '',
-        bankName: '',
-        swiftCode: '',
-        amount: ''
-    });
 
     const invoicePreviewRef = useRef(null);
     const logoInputRef = useRef(null);
@@ -1005,16 +876,6 @@ export default function App() {
         setDarkMode(prev => !prev);
     };
 
-    const showQRCode = () => {
-        // Update payment info with current total
-        const total = subtotal + taxAmount - Number(currentInvoice.discount);
-        setPaymentInfo(prev => ({ 
-            ...prev, 
-            amount: `${currentInvoice.currency.symbol}${total.toFixed(2)}` 
-        }));
-        setQRModalOpen(true);
-    };
-
     // Calculations
     const subtotal = currentInvoice.items.reduce((acc, item) => acc + Number(item.quantity) * Number(item.price), 0);
     const taxAmount = (subtotal * Number(currentInvoice.tax)) / 100;
@@ -1073,17 +934,6 @@ export default function App() {
                             </div>
                         </div>
                         <div className="flex items-center space-x-3">
-                            <button
-                                onClick={showQRCode}
-                                style={{
-                                    backgroundColor: theme.buttonBg,
-                                    color: theme.buttonText
-                                }}
-                                className="p-3 hover:opacity-90 rounded-xl transition-all duration-200"
-                                title="Show QR Code"
-                            >
-                                <QrCode size={20} />
-                            </button>
                             <button
                                 onClick={toggleDarkMode}
                                 style={{
@@ -1152,7 +1002,7 @@ export default function App() {
                                             borderColor: theme.inputBorder,
                                             color: theme.inputText
                                         }}
-                                        className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                                        className="w-full border rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     />
                                 </div>
                                 <div>
@@ -1166,7 +1016,7 @@ export default function App() {
                                             borderColor: theme.inputBorder,
                                             color: theme.inputText
                                         }}
-                                        className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                                        className="w-full border rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     />
                                 </div>
                                 <div>
@@ -1199,7 +1049,7 @@ export default function App() {
                                             borderColor: theme.inputBorder,
                                             color: theme.inputText
                                         }}
-                                        className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                                        className="w-full border rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
                                     />
                                     <input
                                         placeholder="your@email.com"
@@ -1211,7 +1061,7 @@ export default function App() {
                                             borderColor: theme.inputBorder,
                                             color: theme.inputText
                                         }}
-                                        className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                                        className="w-full border rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
                                     />
                                     <textarea
                                         placeholder="Company Address"
@@ -1224,7 +1074,7 @@ export default function App() {
                                             borderColor: theme.inputBorder,
                                             color: theme.inputText
                                         }}
-                                        className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none placeholder-gray-500"
+                                        className="w-full border rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none placeholder-gray-500"
                                     />
 
                                     <div className="grid grid-cols-2 gap-4">
@@ -1263,7 +1113,7 @@ export default function App() {
                                             borderColor: theme.inputBorder,
                                             color: theme.inputText
                                         }}
-                                        className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                                        className="w-full border rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
                                     />
                                     <input
                                         placeholder="Client Email"
@@ -1275,7 +1125,7 @@ export default function App() {
                                             borderColor: theme.inputBorder,
                                             color: theme.inputText
                                         }}
-                                        className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
+                                        className="w-full border rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-500"
                                     />
                                     <textarea
                                         placeholder="Client Address"
@@ -1288,7 +1138,7 @@ export default function App() {
                                             borderColor: theme.inputBorder,
                                             color: theme.inputText
                                         }}
-                                        className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none placeholder-gray-500"
+                                        className="w-full border rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none placeholder-gray-500"
                                     />
                                 </div>
                             </div>
@@ -1341,7 +1191,7 @@ export default function App() {
                                             borderColor: theme.inputBorder,
                                             color: theme.inputText
                                         }}
-                                        className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none placeholder-gray-500"
+                                        className="w-full border rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none placeholder-gray-500"
                                         placeholder="Additional notes or payment terms..."
                                     />
                                 </div>
@@ -1361,7 +1211,7 @@ export default function App() {
                                                 borderColor: theme.inputBorder,
                                                 color: theme.inputText
                                             }}
-                                            className="w-20 border rounded-lg px-2 py-1 text-right text-sm"
+                                            className="w-20 border rounded-lg px-2 py-1 text-right text-base"
                                         />
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
@@ -1375,7 +1225,7 @@ export default function App() {
                                                 borderColor: theme.inputBorder,
                                                 color: theme.inputText
                                             }}
-                                            className="w-20 border rounded-lg px-2 py-1 text-right text-sm"
+                                            className="w-20 border rounded-lg px-2 py-1 text-right text-base"
                                         />
                                     </div>
                                     <div className="pt-3" style={{ borderTopColor: theme.cardBorder, borderTopWidth: '1px' }}>
@@ -1588,19 +1438,6 @@ export default function App() {
                 />
             )}
 
-            {isQRModalOpen && (
-                <QRCodeModal
-                    isOpen={isQRModalOpen}
-                    onClose={() => setQRModalOpen(false)}
-                    paymentInfo={{
-                        ...paymentInfo,
-                        companyName: currentInvoice.billFrom.name || paymentInfo.companyName,
-                        amount: `${currentInvoice.currency.symbol}${total.toFixed(2)}`
-                    }}
-                    theme={theme}
-                />
-            )}
-
             {isConfirmModalOpen && (
                 <ConfirmationModal
                     isOpen={isConfirmModalOpen}
@@ -1619,8 +1456,6 @@ export default function App() {
                 setThemeColor={setThemeColor}
                 clearAllData={clearAllData}
                 resetTheme={resetTheme}
-                paymentInfo={paymentInfo}
-                setPaymentInfo={setPaymentInfo}
                 theme={theme}
             />
         </div>
